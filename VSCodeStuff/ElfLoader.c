@@ -10,7 +10,7 @@
 
 
 int main(){
-    FILE* fp = fopen("/home/danielcho/Desktop/NSF-REU/ELFFileManipulator/VSCodeStuff/example.c", "rb");
+    FILE* fp = fopen("example", "r+b");
     if(fp == NULL)
     {
         printf("failed to load\n");
@@ -25,10 +25,8 @@ int main(){
     }
 
     printf("%d\n",hdr.e_version);
-
+//https://refspecs.linuxbase.org/elf/elf.pdf
     Elf64_Phdr p[hdr.e_phnum];
-
-
 
 
     printf("ELF e_ident padding: \n");
@@ -37,21 +35,26 @@ int main(){
         printf("%d\n", hdr.e_ident[i]);
     }
 
-    hdr.e_ident[9] = 99; //changing the first byte of padding in e_ident in ELF header, original is 115
 
-    printf("ELF e_ident padding after: \n");
-    for (int i = 9; i < 16; i++)
-    {
-        printf("%d\n", hdr.e_ident[i]);
+    for(int i = 0; i < hdr.e_phnum; i++){
+        p[i];
+        if(1 != fread(&p[i], sizeof(hdr), 1, fp)){
+            printf("failed to read elf header\n");
+            exit(1);
+        }
+
     }
 
-    rewind(fp);
-    fwrite(&hdr, sizeof(hdr), 1, fp);
+
+    // printf("ELF e_ident padding after: \n");
+    // for (int i = 9; i < 16; i++)
+    // {
+    //     printf("%d\n", hdr.e_ident[i]);
+    // }
+
+    // rewind(fp);
+    // fwrite(&hdr, sizeof(hdr), 1, fp);
     fclose(fp);
-
-    
-
-
 
     // If program doesn't exit, header was read and can be worked with down here.
 }
