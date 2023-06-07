@@ -1,13 +1,37 @@
-#include <elf.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "elf_support.h"
 #include <fcntl.h>
-#include <unistd.h>
 #include <errno.h>
 #include <string.h>
+#include <unistd.h>
 
-//https://stackoverflow.com/a/2180788
+Elf64_Manager* initialize_manager64(int num_phdr, int num_shdr){
+    Elf64_Manager* manager = (Elf64_Manager*) malloc(sizeof(Elf64_Manager));
+    manager->p_hdr = (Elf64_Phdr*) malloc(sizeof(Elf64_Phdr)* num_phdr); 
+    manager->s_hdr = (Elf64_Shdr*) malloc(sizeof(Elf64_Shdr)* num_shdr); 
+    return manager;
+}
+
+void free_manager64(Elf64_Manager* manager){
+    free(manager->p_hdr);
+    free(manager->s_hdr);
+    free(manager);
+}
+
+Elf32_Manager* initialize_manager32(int num_phdr, int num_shdr){
+    Elf32_Manager* manager = (Elf32_Manager*) malloc(sizeof(Elf32_Manager));
+    manager->p_hdr = (Elf32_Phdr*) malloc(sizeof(Elf32_Phdr)* num_phdr); 
+    manager->s_hdr = (Elf32_Shdr*) malloc(sizeof(Elf32_Shdr)* num_shdr); 
+    return manager;
+}
+
+void free_manager32(Elf32_Manager* manager){
+    free(manager->p_hdr);
+    free(manager->s_hdr);
+    free(manager);
+}
+
 int cp(const char *to, const char *from){
     int fd_to, fd_from;
     char buf[4096];
@@ -85,21 +109,17 @@ Elf64_Manager* load_elf64_file(char* file_path){
     }
 
     Elf64_Manager* manager = initialize_manager64(hdr.e_phnum,hdr.e_shnum);
-    manager->e_hdr = hdr;
+    memcpy(&(manager->e_hdr), &hdr, sizeof(Elf64_Ehdr));
 
 
     printf("Number of program headers: %d\nNumber of section headers: %d\n",hdr.e_phnum,hdr.e_shnum);
-
-    printf("ELF e_ident padding: \n");
-    for (int i = 9; i < 16; i++)
-    {
-        printf("%d\n", manager->e_hdr.e_ident[i]);
-    }
+    printf("Program Header Offset: %lx, size %x\n",hdr.e_phoff, hdr.e_phentsize*hdr.e_phnum);
+    printf("Section Header Offset: %lx, size %x\n",hdr.e_shoff, hdr.e_shentsize*hdr.e_shnum);
 
     fseek(fp,hdr.e_phoff ,SEEK_SET);
-
+    
     for(int i = 0; i < hdr.e_phnum; i++){
-        if(1 != fread(&(manager->p_hdr[i]), sizeof(manager->p_hdr[i]), 1, fp)){
+        if(1 != fread(&(manager->p_hdr[i]), sizeof(Elf64_Phdr), 1, fp)){
             printf("failed to read program header\n");
             exit(1);
         }
@@ -108,7 +128,7 @@ Elf64_Manager* load_elf64_file(char* file_path){
     fseek(fp,hdr.e_shoff ,SEEK_SET);
 
     for(int i = 0; i < hdr.e_shnum; i++){
-        if(1 != fread(&(manager->s_hdr[i]), sizeof(manager->s_hdr[i]), 1, fp)){
+        if(1 != fread(&(manager->s_hdr[i]), sizeof(Elf64_Shdr), 1, fp)){
             printf("failed to read section header\n");
             exit(1);
         }
@@ -146,26 +166,18 @@ void write_elf64_file(Elf64_Manager* manager, char* file_path){
     fclose(fp);
     fp = fopen(output_path,"r+b");
 
-
-
     fwrite(&(manager->e_hdr), sizeof(manager->e_hdr), 1, fp);
 
-
     fseek(fp, manager->e_hdr.e_phoff, SEEK_SET);
-    fwrite(manager->p_hdr, sizeof(manager->p_hdr),1,fp);
-    fseek(fp, manager->e_hdr.e_shoff, SEEK_SET);
-    fwrite(manager->s_hdr, sizeof(manager->s_hdr),1,fp);
-    fclose(fp);
-}
-
-int main(int argc, char** argv){
-    if(argc < 2){
-        printf("Need to specify a path to a file as an argument\n");
-        return 1;
+    for(int i = 0; i < manager->e_hdr.e_phnum; i++){
+        fwrite(&(manager->p_hdr[i]), sizeof(Elf64_Phdr),1,fp);
     }
-    Elf64_Manager* manager = load_elf64_file(argv[1]);
-    printf("Loaded file\n");
-    write_elf64_file(manager, argv[1]);
-    free_manager64(manager);
-    return 0;
+    
+
+    fseek(fp, manager->e_hdr.e_shoff, SEEK_SET);
+    for(int i = 0; i < manager->e_hdr.e_phnum; i++){
+        fwrite(&(manager->s_hdr[i]), sizeof(Elf64_Shdr),1,fp);
+    }
+
+    fclose(fp);
 }
