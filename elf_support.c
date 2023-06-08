@@ -275,7 +275,7 @@ void write_elf64_file(Elf64_Manager* manager, char* file_path){
     fclose(fp);
     fp = fopen(output_path,"r+b");
 
-    fwrite(&(manager->e_hdr), sizeof(manager->e_hdr), 1, fp);
+    fwrite(&(manager->e_hdr), sizeof(Elf64_Ehdr), 1, fp);
 
     fseek(fp, manager->e_hdr.e_phoff, SEEK_SET);
     for(int i = 0; i < manager->e_hdr.e_phnum; i++){
