@@ -23,24 +23,26 @@ int main(int argc, char** argv){
         }
     }
 
-    printf("Last Section: %x - %lx",final_offset, final_offset + manager->s_hdr[final_section].sh_size);
+    printf("Last Section: %x - %lx\n",final_offset, final_offset + manager->s_hdr[final_section].sh_size);
 
     //https://stackoverflow.com/questions/2022179/c-quick-calculation-of-next-multiple-of-4
     //Adding section at next multiple of 4/8/16/32/64 might be needed later
-    
+
     manager->s_hdr = realloc(manager->s_hdr, sizeof(Elf64_Shdr) * (manager->e_hdr.e_shnum + 1));
     if(manager->s_hdr == NULL){
         printf("Realloc space lacking for realloc\n");
         return 1;
     }
 
-    Elf64_Shdr new_section = manager->s_hdr[manager->e_hdr.e_shnum];//Point to new last section
-    memcpy(&new_section, &(manager->s_hdr[manager->e_hdr.e_shnum-1]), sizeof(Elf64_Shdr)); //Copy old last section into it
+    Elf64_Shdr new_section; //Point to new last section
+    memcpy(&new_section, &(manager->s_hdr[final_section]), sizeof(Elf64_Shdr)); //Copy old last section into it
     manager->e_hdr.e_shnum += 1;
-    new_section.sh_offset = final_offset + new_section.sh_size;
-    new_section.sh_size = 1024*1024;  
+    new_section.sh_offset = (final_offset + new_section.sh_size + 7) & (-8); //Get next multiple of 8 at end of last section
+    new_section.sh_size = 1024;  
 
     manager->e_hdr.e_shoff += new_section.sh_size;
+
+    memcpy(&(manager->s_hdr[manager->e_hdr.e_shnum-1]),&new_section,sizeof(Elf64_Shdr));
 
     write_elf64_file(manager, argv[1]);
 
@@ -53,7 +55,7 @@ int main(int argc, char** argv){
     FILE* fp = fopen(output_path, "r+b");
     fseek(fp, new_section.sh_offset,SEEK_SET);
 
-    for(int i = new_section.sh_offset; i < new_section.sh_offset + new_section.sh_size; i++){
+    for(int i = 0; i < new_section.sh_size; i++){
         uint8_t j = 4;
         fwrite(&j, sizeof(j), 1, fp);
     }

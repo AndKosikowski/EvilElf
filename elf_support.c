@@ -115,8 +115,8 @@ Elf64_Manager* load_elf64_file(char* file_path){
     memcpy(&(manager->e_hdr), &hdr, sizeof(Elf64_Ehdr));
 
     printf("Number of program headers: %d\nNumber of section headers: %d\n",hdr.e_phnum,hdr.e_shnum);
-    printf("Program Header Offset: %lx, size %x\n",hdr.e_phoff, hdr.e_phentsize*hdr.e_phnum);
-    printf("Section Header Offset: %lx, size %x\n",hdr.e_shoff, hdr.e_shentsize*hdr.e_shnum);
+    printf("Program Header Offset: %#lx, size %#x\n",hdr.e_phoff, hdr.e_phentsize*hdr.e_phnum);
+    printf("Section Header Offset: %#lx, size %#x\n",hdr.e_shoff, hdr.e_shentsize*hdr.e_shnum);
 
     fseek(fp,hdr.e_phoff ,SEEK_SET);
     
@@ -152,6 +152,30 @@ int get_file_name_size_from_path(char* file_path){
     return length;
 }
 
+void print_elf64_program_header(Elf64_Manager* manager, int index){
+    Elf64_Phdr phdr = manager->p_hdr[index];
+
+    char buffer[1024];
+    printf("Program Index %d\n",index);
+    get_program_type(buffer, phdr.p_type);
+    printf("p_type: %d %s\n", phdr.p_type, buffer);
+    printf("p_offset: %#lx\n", phdr.p_offset);
+    printf("p_vaddr: %#lx\n", phdr.p_vaddr);
+    printf("p_paddr: %#lx\n", phdr.p_paddr);
+    printf("p_filesz: %#lx\n", phdr.p_filesz);
+    printf("p_memsz: %#lx\n", phdr.p_memsz);
+    get_program_flags(buffer,phdr.p_flags);
+    printf("p_flags: %x %s\n", phdr.p_flags,buffer);
+    printf("p_align: %#lx\n\n", phdr.p_align);
+
+}
+
+void print_all_elf64_program_header(Elf64_Manager* manager){
+    for(int i = 0; i < manager->e_hdr.e_phnum; i++){
+        print_elf64_program_header(manager,i);
+    }
+}
+
 void print_elf64_section_header(Elf64_Manager* manager, int index){
     FILE* fp = fopen(manager->file_path, "r+b");
     Elf64_Shdr shdr = manager->s_hdr[index];
@@ -164,18 +188,48 @@ void print_elf64_section_header(Elf64_Manager* manager, int index){
     printf("sh_name: (offset) %d (entry in string table) %s\n", shdr.sh_name,buffer);
     get_section_type(buffer,shdr.sh_type);
     printf("sh_type: %d %s\n", shdr.sh_type,buffer);
-    get_section_flag(buffer,shdr.sh_type);
-    printf("sh_flags: %ld %s\n", shdr.sh_flags,buffer);
-    printf("sh_addr: %lx\n", shdr.sh_addr);
-    printf("sh_off: %lx\n", shdr.sh_offset);
-    printf("sh_size: %lx\n", shdr.sh_size);
-    printf("sh_link: %x\n", shdr.sh_link);
-    printf("sh_info: %x\n", shdr.sh_info);
-    printf("sh_addralign: %lx\n", shdr.sh_addralign);
-    printf("sh_entsize: %lx\n\n", shdr.sh_entsize);
+    get_section_flags(buffer,shdr.sh_type);
+    printf("sh_flags: %#lx %s\n", shdr.sh_flags,buffer);
+    printf("sh_addr: %#lx\n", shdr.sh_addr);
+    printf("sh_off: %#lx\n", shdr.sh_offset);
+    printf("sh_size: %#lx\n", shdr.sh_size);
+    printf("sh_link: %#x\n", shdr.sh_link);
+    printf("sh_info: %#x\n", shdr.sh_info);
+    printf("sh_addralign: %#lx\n", shdr.sh_addralign);
+    printf("sh_entsize: %#lx\n\n", shdr.sh_entsize);
 }
 
-void get_section_flag(char* string, uint32_t value){
+void print_all_elf64_section_header(Elf64_Manager* manager){
+    for(int i = 0; i < manager->e_hdr.e_shnum; i++){
+        print_elf64_section_header(manager,i);
+    }
+}
+
+void get_program_type(char* string, uint32_t value){
+    switch (value) {
+        case 0: strcpy(string, "PT_NULL"); break;
+        case 1: strcpy(string, "PT_LOAD"); break;
+        case 2: strcpy(string, "PT_DYNAMIC"); break;
+        case 3: strcpy(string, "PT_INTERP"); break;
+        case 4: strcpy(string, "PT_NOTE"); break;
+        case 5: strcpy(string, "PT_SHLIB"); break;
+        case 6: strcpy(string, "PT_PHDR"); break;
+        case 0x70000000: strcpy(string, "PT_LOPROC"); break;
+        case 0x7fffffff: strcpy(string, "PT_HIPROC"); break;
+        default: strcpy(string, "UNKNOWN"); break;
+    }
+}
+
+void get_program_flags(char* string, uint32_t value){
+    string[0] = '\0';
+    if ((value & 0x1) != 0) strcat(string, "PF_X,");
+    if ((value & 0x2) != 0) strcat(string, "PF_W,");
+    if ((value & 0x4) != 0) strcat(string, "PF_R,");
+    if ((value & 0xf0000000) != 0) strcat(string, "PF_MASKPROC,");
+    return;
+}
+
+void get_section_flags(char* string, uint32_t value){
     string[0] = '\0';
     if ((value & 0x1) != 0) strcat(string, "SHF_WRITE,");
     if ((value & 0x2) != 0) strcat(string, "SHF_ALLOC,");
@@ -204,7 +258,6 @@ void get_section_type(char* string, uint32_t value){
         case 0xffffffff: strcpy(string, "SHT_HIUSER"); break;
         default: strcpy(string, "UNKNOWN"); break;
     }
-    return;
 }
 
 void write_elf64_file(Elf64_Manager* manager, char* file_path){
@@ -230,7 +283,7 @@ void write_elf64_file(Elf64_Manager* manager, char* file_path){
     
 
     fseek(fp, manager->e_hdr.e_shoff, SEEK_SET);
-    for(int i = 0; i < manager->e_hdr.e_phnum; i++){
+    for(int i = 0; i < manager->e_hdr.e_shnum; i++){
         fwrite(&(manager->s_hdr[i]), sizeof(Elf64_Shdr),1,fp);
     }
 

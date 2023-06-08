@@ -14,9 +14,18 @@ Elf64_Manager* initialize_manager64(int num_phdr, int num_shdr);
 
 void free_manager64(Elf64_Manager* manager);
 
+void print_elf64_program_header(Elf64_Manager* manager, int index);
+
+void print_all_elf64_program_header(Elf64_Manager* manager);
+
 void print_elf64_section_header(Elf64_Manager* manager, int index);
 
-void get_section_flag(char* string, uint32_t value);
+void print_all_elf64_section_header(Elf64_Manager* manager);
+
+void get_program_type(char* string, uint32_t value);
+
+void get_program_flags(char* string, uint32_t value);
+void get_section_flags(char* string, uint32_t value);
 
 void get_section_type(char* string, uint32_t value);
 
