@@ -1,5 +1,0 @@
-AndrewFunTimeFolder/
-*.o
-**/.vscode/
-valgrind-out.txt
-!makefile
