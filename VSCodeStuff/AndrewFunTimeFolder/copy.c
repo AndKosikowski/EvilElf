@@ -1,59 +1,22 @@
-    #include <elf.h>
-    #include <stdio.h>
-    #include <stdlib.h>
-     
-    int main()
-    {
-      FILE* fp = fopen("../example", "r+b");
-      if(fp == NULL)
-      {
-         printf("failed to load\n");
-         exit(1);
-      }
+#include "../elf_support.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-      Elf64_Ehdr hdr;
-      if (1 != fread(&hdr, sizeof(hdr), 1, fp))
-      {
-         printf("failed to read elf header\n");
-         exit(1);
-      }
+int main(int argc, char* argv[]){
+   if(argc < 2){
+      printf("Need to specify a path to a file as an argument\n");
+      return 1;
+   }
+   Elf64_Manager* manager = load_elf64_file(argv[1]);
+   printf("Loaded file\n");
 
-      // printf("%d\n",hdr.e_version);
+   for(int i = 0; i < manager->e_hdr.e_shnum; i++){
+      print_elf64_section_header(manager, i);
+   }
+   
 
-      // Elf64_Phdr p[hdr.e_phnum];
-
-
-
-
-      printf("ELF e_ident padding: \n");
-      for (int i = 9; i < 16; i++)
-      {
-         printf("%d\n", hdr.e_ident[i]);
-      }
-
-      for (int i = 9; i < 16; i++)
-      {
-         hdr.e_ident[i] = 1; //changing the first byte of padding in e_ident in ELF header, original is 0
-      }
-
-      printf("Original Flags: %x\n", hdr.e_flags);
-      hdr.e_flags = 0xFAFA;
-      printf("New Flags: %x\n", hdr.e_flags);
-
-      // hdr.e_ident[9] = 1;
-
-      printf("ELF e_ident padding after: \n");
-      for (int i = 9; i < 16; i++)
-      {
-         printf("%d\n", hdr.e_ident[i]);
-      }
-
-      printf("ELF e_ident size before: \n");
-
-
-      rewind(fp);
-      fwrite(&hdr, sizeof(hdr), 1, fp);
-      fclose(fp);
-     
-       return 0;
-    }
+//  write_elf64_file(manager, argv[1]);
+   free_manager64(manager);
+   printf("File should be unchanged\n");
+   return 0;
+}

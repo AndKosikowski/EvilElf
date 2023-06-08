@@ -58,26 +58,6 @@ int main(int argc, char** argv){
         fwrite(&j, sizeof(j), 1, fp);
     }
 
-    fseek(fp,manager->e_hdr.e_shstrndx, SEEK_SET);
-    int num_strings = manager->e_hdr.e_shnum;
-    int i = 0;
-    while(i < num_strings){
-        char c = fgetc(fp);
-        if ( c == '\0'){
-            i++;
-            printf("\n");
-        }else{
-            printf("%c",c);
-        }
-        
-    }
-    // for(int i = 0; i < manager->e_hdr.e_shnum; i++){
-    //     char buff[1024];
-    //     fgets(buff, 1024, fp);
-    //     printf("%s\n",buff);
-    //     // fseek(fp, manager->s_hdr[i].sh_name, SEEK_CUR);
-    // }
-
     free_manager64(manager);
     fclose(fp);
     return 0;
