@@ -197,6 +197,7 @@ void print_elf64_section_header(Elf64_Manager* manager, int index){
     printf("sh_info: %#x\n", shdr.sh_info);
     printf("sh_addralign: %#lx\n", shdr.sh_addralign);
     printf("sh_entsize: %#lx\n\n", shdr.sh_entsize);
+    fclose(fp);
 }
 
 void print_all_elf64_section_header(Elf64_Manager* manager){
