@@ -38,7 +38,7 @@ int main(int argc, char** argv){
     memcpy(&new_section, &(manager->s_hdr[final_section]), sizeof(Elf64_Shdr)); //Copy old last section into it
     manager->e_hdr.e_shnum += 1;
     new_section.sh_offset = (final_offset + new_section.sh_size + 7) & (-8); //Get next multiple of 8 at end of last section
-    new_section.sh_size = 1024;  
+    new_section.sh_size = 1024*1024;  
 
     manager->e_hdr.e_shoff += new_section.sh_size;
 

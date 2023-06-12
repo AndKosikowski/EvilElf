@@ -5,6 +5,8 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 Elf64_Manager* initialize_manager64(int num_phdr, int num_shdr){
     Elf64_Manager* manager = (Elf64_Manager*) malloc(sizeof(Elf64_Manager));
@@ -263,7 +265,11 @@ void get_section_type(char* string, uint32_t value){
 
 void write_elf64_file(Elf64_Manager* manager, char* file_path){
     FILE* fp = fopen(file_path, "r+b");
-    char* folder = "ModifiedElfOutput/";
+    char* folder = "ModifiedElfOutput/"; 
+    struct stat st = {0}; 
+    if (stat("ModifiedElfOutput", &st) == -1) {//Creates base directory if needed
+        mkdir("ModifiedElfOutput", S_IRWXU | S_IRWXG | S_IRWXO);
+    }
     int size = get_file_name_size_from_path(file_path);
     char output_path[19+size];
     strcpy(output_path, folder);
@@ -274,6 +280,7 @@ void write_elf64_file(Elf64_Manager* manager, char* file_path){
     cp(output_path,file_path);
     fclose(fp);
     fp = fopen(output_path,"r+b");
+    fchmod(fileno(fp), S_IRWXU | S_IRWXG | S_IRWXO);
 
     fwrite(&(manager->e_hdr), sizeof(Elf64_Ehdr), 1, fp);
 
