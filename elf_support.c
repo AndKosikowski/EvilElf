@@ -318,6 +318,66 @@ void get_section_type(char* string, uint32_t value){
 //     fclose(fp);
 // }
 
+//gets index of first section going by name
+int get_first_section_index_by_name(Elf64_Manager* manager, char* name){
+    int num_sections = manager->e_hdr.e_shnum;
+    uint8_t* string_table_file_section = manager->file_sections[manager->e_hdr.e_shstrndx];
+
+    for(int i = 0; i < num_sections; i++){
+        char* found = string_table_file_section + manager->s_hdr[i].sh_name;
+        if (strcmp(name,found) == 0){
+            return i;
+        }
+    }
+    return -1;
+}
+
+
+//Appends new section of section_size to manager, updates ELF header e_shnum, Section table, and file_sections
+int append_new_section(Elf64_Manager* manager, int section_size){
+    int final_section = 0;
+    int final_offset = 0;
+    for(int i = 1; i < manager->e_hdr.e_shnum; i++){
+        if(manager->s_hdr[i].sh_offset > final_offset){
+            final_section = i;
+            final_offset = manager->s_hdr[i].sh_offset;
+        }
+    }
+
+    void* ptr = realloc(manager->s_hdr, sizeof(Elf64_Shdr) * (manager->e_hdr.e_shnum + 1));
+    if(ptr == NULL){
+        printf("Realloc failed when adding section header entry\n");
+        return -1;
+    }
+    manager->s_hdr = ptr;
+
+    Elf64_Shdr new_section; //Point to new last section
+    memcpy(&new_section, &(manager->s_hdr[final_section]), sizeof(Elf64_Shdr)); //Copy old last section into it
+    manager->e_hdr.e_shnum += 1;
+    new_section.sh_offset = (final_offset + new_section.sh_size + 7) & (-8); //Get next multiple of 8 at end of last section
+    new_section.sh_size = section_size;  
+
+    manager->e_hdr.e_shoff += new_section.sh_size;
+
+    int new_section_index = manager->e_hdr.e_shnum-1;
+
+    memcpy(&(manager->s_hdr[new_section_index]),&new_section,sizeof(Elf64_Shdr));
+
+    ptr = realloc(manager->file_sections, sizeof(uint8_t*) * manager->e_hdr.e_shnum);
+    if(ptr == NULL){
+        printf("Realloc failed when adding file section\n");
+        return -1;
+    }
+    manager->file_sections = ptr;
+    ptr = malloc(sizeof(uint8_t) * section_size);
+    if(ptr == NULL){
+        printf("Realloc failed when adding file section\n");
+        return -1;
+    }
+    manager->file_sections[new_section_index] = ptr;
+    return new_section_index;
+}
+
 void write_elf64_file(Elf64_Manager* manager, char* file_path){
     char* folder = "ModifiedElfOutput/"; 
 

@@ -15,6 +15,10 @@ Elf64_Manager* initialize_manager64(int num_phdr, int num_shdr);
 
 void free_manager64(Elf64_Manager* manager);
 
+int append_new_section(Elf64_Manager* manager, int section_size);
+
+int get_first_section_index_by_name(Elf64_Manager* manager, char* name);
+
 void print_elf64_program_header(Elf64_Manager* manager, int index);
 
 void print_all_elf64_program_header(Elf64_Manager* manager);
