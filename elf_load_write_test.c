@@ -12,7 +12,7 @@ int main(int argc, char** argv){
     print_all_elf64_program_header(manager);
     print_all_elf64_section_header(manager);
 
-    int index = get_first_section_index_by_name(manager, ".text");
+    int index = get_next_section_index_by_name(manager, ".text",0);
     if(index != -1){
         print_elf64_section_header(manager,index);
     }

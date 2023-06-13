@@ -17,7 +17,9 @@ void free_manager64(Elf64_Manager* manager);
 
 int append_new_section(Elf64_Manager* manager, int section_size);
 
-int get_first_section_index_by_name(Elf64_Manager* manager, char* name);
+int get_next_section_index_by_name(Elf64_Manager* manager, char* name, int index);
+
+int get_next_program_index_by_type(Elf64_Manager* manager, int type, int index);
 
 void print_elf64_program_header(Elf64_Manager* manager, int index);
 

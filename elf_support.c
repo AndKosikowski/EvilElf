@@ -318,12 +318,12 @@ void get_section_type(char* string, uint32_t value){
 //     fclose(fp);
 // }
 
-//gets index of first section going by name
-int get_first_section_index_by_name(Elf64_Manager* manager, char* name){
+//gets index of next occurence of section going by name starting at index
+int get_next_section_index_by_name(Elf64_Manager* manager, char* name, int index){
     int num_sections = manager->e_hdr.e_shnum;
     uint8_t* string_table_file_section = manager->file_sections[manager->e_hdr.e_shstrndx];
 
-    for(int i = 0; i < num_sections; i++){
+    for(int i = index; i < num_sections; i++){
         char* found = string_table_file_section + manager->s_hdr[i].sh_name;
         if (strcmp(name,found) == 0){
             return i;
@@ -331,6 +331,18 @@ int get_first_section_index_by_name(Elf64_Manager* manager, char* name){
     }
     return -1;
 }
+
+//gets index of next occurence of program of type starting at index
+int get_next_program_index_by_type(Elf64_Manager* manager, int type, int index){
+    int num_sections = manager->e_hdr.e_shnum;
+    for(int i = index; i < num_sections; i++){
+        if (type == manager->p_hdr[i].p_type){
+            return i;
+        }
+    }
+    return -1;
+}
+
 
 
 //Appends new section of section_size to manager, updates ELF header e_shnum, Section table, and file_sections
