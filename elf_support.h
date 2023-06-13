@@ -4,10 +4,11 @@
 #include <stdio.h>
 
 typedef struct elf64_manager {
-    char file_path[4096];
     Elf64_Ehdr e_hdr;
     Elf64_Phdr* p_hdr;
     Elf64_Shdr* s_hdr;
+    char file_path[4096];
+    uint8_t** file_sections;
 } Elf64_Manager;
 
 Elf64_Manager* initialize_manager64(int num_phdr, int num_shdr);
@@ -43,9 +44,11 @@ void free_manager32(Elf32_Manager* manager);
 int cp(const char *to, const char *from);
 
 Elf64_Manager* load_elf64_file(char* file_path);
+Elf64_Manager* load_elf64_file_v2(char* file_path);
 
 int get_file_name_size_from_path(char* file_path);
 
 
 void write_elf64_file(Elf64_Manager* manager, char* file_path);
+void write_elf64_file_v2(Elf64_Manager* manager, char* file_path);
 #endif

@@ -25,14 +25,12 @@ int main(int argc, char** argv){
 
     printf("Last Section: %x - %lx\n",final_offset, final_offset + manager->s_hdr[final_section].sh_size);
 
-    //https://stackoverflow.com/questions/2022179/c-quick-calculation-of-next-multiple-of-4
-    //Adding section at next multiple of 4/8/16/32/64 might be needed later
-
-    manager->s_hdr = realloc(manager->s_hdr, sizeof(Elf64_Shdr) * (manager->e_hdr.e_shnum + 1));
-    if(manager->s_hdr == NULL){
-        printf("Realloc space lacking for realloc\n");
+    void* ptr = realloc(manager->s_hdr, sizeof(Elf64_Shdr) * (manager->e_hdr.e_shnum + 1));
+    if(ptr == NULL){
+        printf("Realloc failed when adding section header entry\n");
         return 1;
     }
+    manager->s_hdr = ptr;
 
     Elf64_Shdr new_section; //Point to new last section
     memcpy(&new_section, &(manager->s_hdr[final_section]), sizeof(Elf64_Shdr)); //Copy old last section into it
@@ -42,25 +40,29 @@ int main(int argc, char** argv){
 
     manager->e_hdr.e_shoff += new_section.sh_size;
 
-    memcpy(&(manager->s_hdr[manager->e_hdr.e_shnum-1]),&new_section,sizeof(Elf64_Shdr));
+    int new_section_index = manager->e_hdr.e_shnum-1;
 
-    write_elf64_file(manager, argv[1]);
+    memcpy(&(manager->s_hdr[new_section_index]),&new_section,sizeof(Elf64_Shdr));
 
-    char* folder = "ModifiedElfOutput/";
-    int size = get_file_name_size_from_path(argv[1]);
-    char output_path[19+size];
-    strcpy(output_path, folder);
-    strcat(output_path, argv[1]+strlen(argv[1])-size);
+    ptr = realloc(manager->file_sections, sizeof(uint8_t*) * manager->e_hdr.e_shnum);
+    if(ptr == NULL){
+        printf("Realloc failed when adding file section\n");
+        return 1;
+    }
+    ptr = realloc(manager->file_sections[new_section_index], sizeof(uint8_t*) * manager->s_hdr[new_section_index].sh_size);
+    if(ptr == NULL){
+        printf("Realloc failed when adding file section\n");
+        return 1;
+    }
+    manager->file_sections[new_section_index] = ptr;
 
-    FILE* fp = fopen(output_path, "r+b");
-    fseek(fp, new_section.sh_offset,SEEK_SET);
-
+    uint8_t* file_section = manager->file_sections[new_section_index];
     for(int i = 0; i < new_section.sh_size; i++){
-        uint8_t j = 4;
-        fwrite(&j, sizeof(j), 1, fp);
+        file_section[i] = 4;
     }
 
+
+    write_elf64_file(manager, argv[1]);
     free_manager64(manager);
-    fclose(fp);
     return 0;
 }

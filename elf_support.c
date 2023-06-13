@@ -7,16 +7,25 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <errno.h>
 
 Elf64_Manager* initialize_manager64(int num_phdr, int num_shdr){
     Elf64_Manager* manager = (Elf64_Manager*) malloc(sizeof(Elf64_Manager));
     manager->p_hdr = (Elf64_Phdr*) malloc(sizeof(Elf64_Phdr)* num_phdr); 
     manager->s_hdr = (Elf64_Shdr*) malloc(sizeof(Elf64_Shdr)* num_shdr); 
+    manager->file_sections = (uint8_t**) malloc(sizeof(uint8_t*) * num_shdr);
+    for(int i = 0; i < num_shdr;i++){
+        manager->file_sections[i] = (uint8_t*) malloc(0);
+    }
     return manager;
 }
 
 
 void free_manager64(Elf64_Manager* manager){
+    for(int i = 0; i < manager->e_hdr.e_shnum; i++){
+        free(manager->file_sections[i]);
+    }
+    free(manager->file_sections);
     free(manager->p_hdr);
     free(manager->s_hdr);
     free(manager);
@@ -35,85 +44,92 @@ void free_manager32(Elf32_Manager* manager){
     free(manager);
 }
 
-int cp(const char *to, const char *from){
-    int fd_to, fd_from;
-    char buf[4096];
-    ssize_t nread;
-    int saved_errno;
+//Currently takes an ELF file and parses it into a struct of elf headers and tables
+// Elf64_Manager* parse_elf64_file_without_saving(char* file_path){
 
-    fd_from = open(from, O_RDONLY);
-    if (fd_from < 0){
-        return -1;
-    }
-        
+//     FILE* fp = fopen(file_path, "r+b");
+//     if(fp == NULL)
+//     {
+//         printf("failed to load (likely invalid file path)\n");
+//         exit(1);
+//     }
 
-    fd_to = open(to, O_RDWR | O_CREAT | O_EXCL, 0666);
-    if (fd_to < 0){
-        goto out_error;
-    }
-        
+//     Elf64_Ehdr hdr;
+//     if (1 != fread(&hdr, sizeof(hdr), 1, fp))
+//     {
+//         printf("failed to read elf header\n");
+//         exit(1);
+//     }
 
-    while (nread = read(fd_from, buf, sizeof buf), nread > 0){
-        char *out_ptr = buf;
-        ssize_t nwritten;
+//     Elf64_Manager* manager = initialize_manager64(hdr.e_phnum,hdr.e_shnum);
+//     strncpy(manager->file_path,file_path,4095);
+//     manager->file_path[4095] = '\0';
+//     memcpy(&(manager->e_hdr), &hdr, sizeof(Elf64_Ehdr));
 
-        do {
-            nwritten = write(fd_to, out_ptr, nread);
-            if (nwritten >= 0){
-                nread -= nwritten;
-                out_ptr += nwritten;
-            }
-            else if (errno != EINTR){
-                goto out_error;
-            }
-        } while (nread > 0);
-    }
+//     printf("Number of program headers: %d\nNumber of section headers: %d\n",hdr.e_phnum,hdr.e_shnum);
+//     printf("Program Header Offset: %#lx, size %#x\n",hdr.e_phoff, hdr.e_phentsize*hdr.e_phnum);
+//     printf("Section Header Offset: %#lx, size %#x\n",hdr.e_shoff, hdr.e_shentsize*hdr.e_shnum);
 
-    if (nread == 0){
-        if (close(fd_to) < 0){
-            fd_to = -1;
-            goto out_error;
+//     fseek(fp,hdr.e_phoff ,SEEK_SET);
+    
+//     for(int i = 0; i < hdr.e_phnum; i++){
+//         if(1 != fread(&(manager->p_hdr[i]), sizeof(Elf64_Phdr), 1, fp)){
+//             printf("failed to read program header\n");
+//             exit(1);
+//         }
+//     }
+
+//     fseek(fp,hdr.e_shoff ,SEEK_SET);
+
+//     for(int i = 0; i < hdr.e_shnum; i++){
+//         if(1 != fread(&(manager->s_hdr[i]), sizeof(Elf64_Shdr), 1, fp)){
+//             printf("failed to read section header\n");
+//             exit(1);
+//         }
+//     }
+
+
+//     fclose(fp);
+
+//     return manager;
+// }
+
+void load_elf64_file_sections(Elf64_Manager* manager){
+    FILE* fp = fopen(manager->file_path, "r+b"); 
+    printf("Loading sections\n");
+    for(int i = 0; i < manager->e_hdr.e_shnum; i++){
+        Elf64_Off offset = manager->s_hdr[i].sh_offset;
+        fseek(fp, offset, SEEK_SET);
+        uint8_t* ptr = (uint8_t*) realloc(manager->file_sections[i],manager->s_hdr[i].sh_size);
+        if(manager->s_hdr[i].sh_size == 0 && ptr == NULL && errno == ENOMEM){
+            printf("Realloc failed because section %d is too large \n", i); // Could write to file instead to prevent this
+            fclose(fp);
+            return;
         }
-        close(fd_from);
-
-        /* Success! */
-        return 0;
+        manager->file_sections[i] = ptr;
+        fread(manager->file_sections[i], manager->s_hdr[i].sh_size, 1, fp);
     }
-
-  out_error:
-    saved_errno = errno;
-
-    close(fd_from);
-    if (fd_to >= 0)
-        close(fd_to);
-
-    errno = saved_errno;
-    return -1;
+    fclose(fp);
 }
 
-
-
-
-//https://stackoverflow.com/questions/25246236/read-file-into-struct
+//Currently takes an ELF file and parses it into a struct of elf headers and tables
 Elf64_Manager* load_elf64_file(char* file_path){
 
     FILE* fp = fopen(file_path, "r+b");
-    if(fp == NULL)
-    {
+    if(fp == NULL){
         printf("failed to load (likely invalid file path)\n");
         exit(1);
     }
 
     Elf64_Ehdr hdr;
-    if (1 != fread(&hdr, sizeof(hdr), 1, fp))
-    {
+    if (1 != fread(&hdr, sizeof(hdr), 1, fp)){
         printf("failed to read elf header\n");
         exit(1);
     }
 
     Elf64_Manager* manager = initialize_manager64(hdr.e_phnum,hdr.e_shnum);
     strncpy(manager->file_path,file_path,4095);
-    manager->file_path[4096] = '\0';
+    manager->file_path[4095] = '\0';
     memcpy(&(manager->e_hdr), &hdr, sizeof(Elf64_Ehdr));
 
     printf("Number of program headers: %d\nNumber of section headers: %d\n",hdr.e_phnum,hdr.e_shnum);
@@ -141,8 +157,12 @@ Elf64_Manager* load_elf64_file(char* file_path){
 
     fclose(fp);
 
+    load_elf64_file_sections(manager);
+
     return manager;
 }
+
+
 
 int get_file_name_size_from_path(char* file_path){
     int length = strlen(file_path);
@@ -263,9 +283,44 @@ void get_section_type(char* string, uint32_t value){
     }
 }
 
+// void write_elf64_headers(Elf64_Manager* manager, char* file_path){
+//     FILE* fp = fopen(file_path, "r+b");
+//     char* folder = "ModifiedElfOutput/"; 
+//     struct stat st = {0}; 
+//     if (stat("ModifiedElfOutput", &st) == -1) {//Creates base directory if needed
+//         mkdir("ModifiedElfOutput", S_IRWXU | S_IRWXG | S_IRWXO);
+//     }
+//     int size = get_file_name_size_from_path(file_path);
+//     char output_path[19+size];
+//     strcpy(output_path, folder);
+
+//     strcat(output_path, file_path+strlen(file_path)-size);
+
+//     printf("made output_path %s\n",output_path);
+//     cp(output_path,file_path);
+//     fclose(fp);
+//     fp = fopen(output_path,"r+b");
+//     fchmod(fileno(fp), S_IRWXU | S_IRWXG | S_IRWXO);
+
+//     fwrite(&(manager->e_hdr), sizeof(Elf64_Ehdr), 1, fp);
+
+//     fseek(fp, manager->e_hdr.e_phoff, SEEK_SET);
+//     for(int i = 0; i < manager->e_hdr.e_phnum; i++){
+//         fwrite(&(manager->p_hdr[i]), sizeof(Elf64_Phdr),1,fp);
+//     }
+    
+
+//     fseek(fp, manager->e_hdr.e_shoff, SEEK_SET);
+//     for(int i = 0; i < manager->e_hdr.e_shnum; i++){
+//         fwrite(&(manager->s_hdr[i]), sizeof(Elf64_Shdr),1,fp);
+//     }
+
+//     fclose(fp);
+// }
+
 void write_elf64_file(Elf64_Manager* manager, char* file_path){
-    FILE* fp = fopen(file_path, "r+b");
     char* folder = "ModifiedElfOutput/"; 
+
     struct stat st = {0}; 
     if (stat("ModifiedElfOutput", &st) == -1) {//Creates base directory if needed
         mkdir("ModifiedElfOutput", S_IRWXU | S_IRWXG | S_IRWXO);
@@ -277,9 +332,14 @@ void write_elf64_file(Elf64_Manager* manager, char* file_path){
     strcat(output_path, file_path+strlen(file_path)-size);
 
     printf("made output_path %s\n",output_path);
-    cp(output_path,file_path);
-    fclose(fp);
-    fp = fopen(output_path,"r+b");
+    
+    FILE* fp;
+
+    fp = fopen(output_path,"w+b");
+    if(fp == NULL){
+        printf("Output path was unable to be created\n");
+        return;
+    }
     fchmod(fileno(fp), S_IRWXU | S_IRWXG | S_IRWXO);
 
     fwrite(&(manager->e_hdr), sizeof(Elf64_Ehdr), 1, fp);
@@ -293,6 +353,16 @@ void write_elf64_file(Elf64_Manager* manager, char* file_path){
     fseek(fp, manager->e_hdr.e_shoff, SEEK_SET);
     for(int i = 0; i < manager->e_hdr.e_shnum; i++){
         fwrite(&(manager->s_hdr[i]), sizeof(Elf64_Shdr),1,fp);
+    }
+
+    for(int i = 0; i < manager->e_hdr.e_shnum; i++){
+        Elf64_Off offset = manager->s_hdr[i].sh_offset;
+        Elf64_Xword size = manager->s_hdr[i].sh_size;
+        fseek(fp, offset, SEEK_SET);
+        if(manager->file_sections[i] == NULL){
+            continue;
+        }
+        fwrite(manager->file_sections[i], 1, size, fp);
     }
 
     fclose(fp);
