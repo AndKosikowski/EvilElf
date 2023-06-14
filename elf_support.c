@@ -390,6 +390,30 @@ int append_new_section(Elf64_Manager* manager, int section_size){
     return new_section_index;
 }
 
+//helper function for below function print_sections_in_segments
+void section_in_segment(Elf64_Manager* manager, Elf64_Phdr segment, FILE* fp) {
+    uint8_t* string_table_file_section = manager->file_sections[manager->e_hdr.e_shstrndx];
+    for (int i = 0; i < manager->e_hdr.e_shnum; i++) {
+        Elf64_Shdr section = manager->s_hdr[i];
+        if (section.sh_addr >= segment.p_vaddr &&
+            section.sh_addr + section.sh_size <= segment.p_vaddr + segment.p_memsz) {
+            printf("%s ", (char*)(string_table_file_section + section.sh_name));
+        }
+    }
+}
+
+//prints all the sections that are in the virtual memory space of each segment
+void print_sections_in_segments(Elf64_Manager* manager, FILE* fp) {
+    uint8_t* string_table_file_section = manager->file_sections[manager->e_hdr.e_shstrndx];
+    for (int i = 0; i < manager->e_hdr.e_phnum; i++) {
+        printf("%i      ", i);
+        Elf64_Phdr segment = manager->p_hdr[i];
+        section_in_segment(manager, segment, fp);
+        printf("\n");
+    }
+}
+
+
 void write_elf64_file(Elf64_Manager* manager, char* file_path){
     char* folder = "ModifiedElfOutput/"; 
 
@@ -438,4 +462,4 @@ void write_elf64_file(Elf64_Manager* manager, char* file_path){
     }
 
     fclose(fp);
-}
+}1024
