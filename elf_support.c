@@ -413,6 +413,106 @@ void print_sections_in_segments(Elf64_Manager* manager, FILE* fp) {
     }
 }
 
+//a struct for grouping segments and respective sections
+struct seg_sect {
+    Elf64_Phdr segment;
+    Elf64_Shdr* sections;
+    int section_count;
+};
+
+//creates an array of above struct that groups segments with sections
+struct seg_sect* segment_table(Elf64_Manager* manager) {
+    struct seg_sect* seg_table = malloc(sizeof(struct seg_sect) * manager->e_hdr.e_phnum);
+    if (seg_table == NULL) {
+        printf("Insufficient memory during allocation\n");
+        return NULL;
+    }
+    for (int j = 0; j < manager->e_hdr.e_phnum; j++) {
+        Elf64_Phdr segment = manager->p_hdr[j];
+        seg_table[j].segment = manager->p_hdr[j];
+        seg_table[j].sections = malloc(sizeof(Elf64_Shdr));
+        int counter = 1;
+        for (int i = 0; i < manager->e_hdr.e_shnum; i++) {
+            Elf64_Shdr section = manager->s_hdr[i];
+            if (section.sh_addr >= segment.p_vaddr &&
+                section.sh_addr + section.sh_size <= segment.p_vaddr + segment.p_memsz) {
+                seg_table[j].sections[counter - 1] = section;
+                counter++;
+                void* ptr = realloc(seg_table[j].sections, sizeof(Elf64_Shdr) * counter);
+                if (ptr == NULL) {
+                    printf("Insufficient memory during realloc\n");
+                    for (int k = 0; k < j; k++) {
+                        free(seg_table[k].sections);
+                    }
+                    free(seg_table);
+                    return NULL;
+                }
+                seg_table[j].sections = ptr;
+            }
+        }
+        seg_table[j].section_count = counter - 1;
+    }
+    return seg_table;
+}
+
+//frees the array of segment-section structs
+void free_seg_table(Elf64_Manager* manager, struct seg_sect* seg_table) {
+    for (int i = 0; i < manager->e_hdr.e_phnum; i++) {
+        free(seg_table[i].sections);
+    }
+    free(seg_table);
+}
+
+//changes all note section's bytes with 4s
+void change_note(Elf64_Manager* manager) {
+    uint8_t* string_table_file_section = manager->file_sections[manager->e_hdr.e_shstrndx];
+    for (int i = 0; i < manager->e_hdr.e_shnum; i++) {
+        Elf64_Shdr section = manager->s_hdr[i];
+        char* found = string_table_file_section + section.sh_name;
+        if (strncmp(".note", found, 5) == 0) {
+            printf("%lx\n", section.sh_offset);
+            uint8_t* file_section = manager->file_sections[i];
+            for (int j = 0; j < section.sh_size; j++) {
+                file_section[j] = 4;
+            }
+        }
+    }
+}
+
+//changes comment section's bytes with 4s
+void change_comment(Elf64_Manager* manager) {
+    uint8_t* string_table_file_section = manager->file_sections[manager->e_hdr.e_shstrndx];
+    for (int i = 0; i < manager->e_hdr.e_shnum; i++) {
+        Elf64_Shdr section = manager->s_hdr[i];
+        char* found = string_table_file_section + section.sh_name;
+        if (strcmp(".comment", found) == 0) {
+            printf("%lx\n", section.sh_offset);
+            uint8_t* file_section = manager->file_sections[i];
+            for (int j = 0; j < section.sh_size; j++) {
+                file_section[j] = 4;
+            }
+        }
+    }
+}
+
+//changes debug section's bytes with 4s
+void change_debug(Elf64_Manager* manager) {
+    uint8_t* string_table_file_section = manager->file_sections[manager->e_hdr.e_shstrndx];
+    for (int i = 0; i < manager->e_hdr.e_shnum; i++) {
+        Elf64_Shdr section = manager->s_hdr[i];
+        char* found = string_table_file_section + section.sh_name;
+        if (strcmp(".debug", found) == 0) {
+            printf("%lx\n", section.sh_offset);
+            uint8_t* file_section = manager->file_sections[i];
+            for (int j = 0; j < section.sh_size; j++) {
+                file_section[j] = 4;
+            }
+        }
+    }
+}
+
+
+
 
 void write_elf64_file(Elf64_Manager* manager, char* file_path){
     char* folder = "ModifiedElfOutput/"; 
@@ -462,4 +562,4 @@ void write_elf64_file(Elf64_Manager* manager, char* file_path){
     }
 
     fclose(fp);
-}1024
+}
