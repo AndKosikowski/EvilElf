@@ -54,6 +54,16 @@ Elf64_Manager* load_elf64_file_v2(char* file_path);
 
 int get_file_name_size_from_path(char* file_path);
 
+void section_in_segment(Elf64_Manager* manager, Elf64_Phdr segment, FILE* fp);
+void print_sections_in_segments(Elf64_Manager* manager, FILE* fp);
+
+struct seg_sect* segment_table(Elf64_Manager* manager);
+void free_seg_table(Elf64_Manager* manager, struct seg_sect* seg_table);
+
+void change_note(Elf64_Manager* manager);
+void change_comment(Elf64_Manager* manager);
+void change_debug(Elf64_Manager* manager);
+
 
 void write_elf64_file(Elf64_Manager* manager, char* file_path);
 void write_elf64_file_v2(Elf64_Manager* manager, char* file_path);
