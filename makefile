@@ -1,4 +1,4 @@
-all: elf_load_write_test add_elf_section example elf_remove_section_header elf_prepend_section
+all: elf_load_write_test add_elf_section example elf_remove_section_header elf_prepend_section elf_append_for_malware elf_header_changes elf_fill_gaps
 
 elf_support.o: elf_support.c
 	gcc -g -c elf_support.o elf_support.c
@@ -14,6 +14,24 @@ elf_prepend_section.o: elf_prepend_section.c
 
 elf_remove_section_header.o: elf_remove_section_header.c
 	gcc -g -c elf_remove_section_header.o elf_remove_section_header.c
+
+elf_append_for_malware.o: elf_append_for_malware.c
+	gcc -g -c elf_append_for_malware.o elf_append_for_malware.c
+
+elf_header_changes.o: elf_header_changes.c
+	gcc -g -c elf_header_changes.o elf_header_changes.c
+
+elf_fill_gaps.o: elf_fill_gaps.c
+	gcc -g -c elf_fill_gaps.o elf_fill_gaps.c
+
+elf_fill_gaps: elf_fill_gaps.o elf_support.o
+	gcc -g -o elf_fill_gaps elf_fill_gaps.o elf_support.o
+
+elf_header_changes: elf_header_changes.o elf_support.o
+	gcc -g -o elf_header_changes elf_header_changes.o elf_support.o
+
+elf_append_for_malware: elf_append_for_malware.o elf_support.o
+	gcc -g -o elf_append_for_malware elf_append_for_malware.o elf_support.o
 
 elf_load_write_test: elf_load_write_test.o elf_support.o
 	gcc -g -o elf_load_write_test elf_load_write_test.o elf_support.o
