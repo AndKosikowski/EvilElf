@@ -67,6 +67,7 @@ void change_note(Elf64_Manager* manager);
 void change_comment(Elf64_Manager* manager);
 void change_debug(Elf64_Manager* manager);
 
+void extend_dynamic_segment(Elf64_Manager* manager, struct seg_sect* seg_table, FILE* fp);
 
 void write_elf64_file(Elf64_Manager* manager, char* file_path);
 void write_elf64_file_v2(Elf64_Manager* manager, char* file_path);

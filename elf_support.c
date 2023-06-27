@@ -512,6 +512,61 @@ void change_debug(Elf64_Manager* manager) {
     }
 }
 
+void extend_dynamic_segment(Elf64_Manager* manager, struct seg_sect* seg_table, FILE* fp) {
+    int cutoff;
+    int file_size;
+    for (int i = 0; i < manager->e_hdr.e_phnum; i++) {
+        Elf64_Phdr segment = manager->p_hdr[i];
+        if (segment.p_type == 2) { //will need to change this for PT_LOAD segment
+            printf("Segment %i of offset %lx and size %lx\n", i, segment.p_offset, segment.p_filesz);
+            cutoff = segment.p_offset;
+            file_size = segment.p_filesz;
+            manager->p_hdr[i].p_filesz += ADDENDUM; //remove this until later until you find the last PT_LOAD segment
+            break;
+        }
+    }
+    int dynam_section;
+    for (int i = 0; i < manager->e_hdr.e_shnum; i++) {
+        Elf64_Shdr section = manager->s_hdr[i];
+        if (section.sh_offset >= cutoff && section.sh_offset < cutoff + file_size) { //going to need to change this part (maybe) in case there is multiple sections in the segment, and so make an array, append all of the sections that satisfy this condition, and choose the last one's offset + file_size as the place to insert new bytes
+            printf("%lx\n", section.sh_offset);
+            dynam_section = i;
+        }
+    }
+
+    void* ptr = realloc(manager->file_sections[dynam_section], sizeof(uint8_t*) * (file_size + ADDENDUM));
+    if (ptr == NULL) {
+        printf("Insufficient memory during realloc\n");
+        return;
+    }
+    manager->file_sections[dynam_section] = ptr;
+    manager->s_hdr[dynam_section].sh_size += ADDENDUM;
+
+    printf("%x\n", dynam_section);
+    uint8_t* section = manager->file_sections[dynam_section];
+    for (int i = file_size; i < file_size + ADDENDUM; i++) {
+        section[i] = 4;
+    }
+    memcpy(&(manager->file_sections[dynam_section]), &section, sizeof(uint8_t*));
+
+    for (int i = 0; i < manager->e_hdr.e_phnum; i++) {
+        Elf64_Phdr segment = manager->p_hdr[i];
+        if (segment.p_offset >= cutoff + file_size) {
+            printf("segment");
+            manager->p_hdr[i].p_offset += ADDENDUM;
+        }
+    }
+    for (int i = 0; i < manager->e_hdr.e_shnum; i++) {
+        Elf64_Shdr section = manager->s_hdr[i];
+        if (section.sh_offset >= cutoff + file_size) {
+            printf("yay\n");
+            manager->s_hdr[i].sh_offset += ADDENDUM;
+        }
+    }
+
+    manager->e_hdr.e_shoff += ADDENDUM;
+}
+
 void find_gaps_in_elf64_file(Elf64_Manager* manager, int** gap_start_final, int** gap_size_final, int* gap_count){
     for(int i = 1; i < manager->e_hdr.e_shnum;i++){
         if(manager->s_hdr[i].sh_offset < manager->s_hdr[i-1].sh_offset){
