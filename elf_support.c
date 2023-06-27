@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <stdbool.h>
 
 Elf64_Manager* initialize_manager64(int num_phdr, int num_shdr){
     Elf64_Manager* manager = (Elf64_Manager*) malloc(sizeof(Elf64_Manager));

@@ -77,11 +77,11 @@ int main(int argc, char** argv){
 
     Elf64_Off inserted_offset = manager->s_hdr[1].sh_offset;
     
-    for(int i = 1; i < manager->e_hdr.e_shnum; i++){
-        manager->s_hdr[i].sh_offset += sizeof(Elf64_Shdr);
-    }
+    // for(int i = 1; i < manager->e_hdr.e_shnum; i++){
+    //     manager->s_hdr[i].sh_offset += sizeof(Elf64_Phdr);
+    // }
 
-    manager->e_hdr.e_shoff += sizeof(Elf64_Shdr);
+    // manager->e_hdr.e_shoff += sizeof(Elf64_Phdr);
 
     for(int i = 2; i < manager->e_hdr.e_shnum;i++){
         manager->s_hdr[i].sh_offset += MAGIC_NUMBER;
@@ -101,8 +101,8 @@ int main(int argc, char** argv){
         int j = i + bump_by;
         if(how_to_change_phentry[i] == 1){
             manager->p_hdr[j].p_offset += MAGIC_NUMBER;
-            manager->p_hdr[j].p_vaddr += MAGIC_NUMBER;
-            manager->p_hdr[j].p_paddr += MAGIC_NUMBER; 
+            // manager->p_hdr[j].p_vaddr += MAGIC_NUMBER;
+            // manager->p_hdr[j].p_paddr += MAGIC_NUMBER; 
             // manager->p_hdr[j].p_vaddr = manager->p_hdr[j].p_offset; //likely bad
             // manager->p_hdr[j].p_paddr = manager->p_hdr[j].p_offset;
         }else if(how_to_change_phentry[i] == 2){
@@ -132,8 +132,8 @@ int main(int argc, char** argv){
                 for(int k = 1; k < manager->e_hdr.e_phnum; k++){
                     if(manager->p_hdr[k].p_offset > manager->p_hdr[0].p_offset){
                         manager->p_hdr[k].p_offset += sizeof(Elf64_Phdr);
-                        manager->p_hdr[k].p_vaddr += sizeof(Elf64_Phdr);//These two might be wrong (this and below)
-                        manager->p_hdr[k].p_paddr += sizeof(Elf64_Phdr);
+                        // manager->p_hdr[k].p_vaddr += sizeof(Elf64_Phdr);//These two might be wrong (this and below)
+                        // manager->p_hdr[k].p_paddr += sizeof(Elf64_Phdr);
                         
                     }
                     
@@ -153,8 +153,11 @@ int main(int argc, char** argv){
                 manager->p_hdr[j+1].p_filesz = manager->p_hdr[j+1].p_filesz - manager->p_hdr[j].p_filesz;
                 manager->p_hdr[j+1].p_memsz = manager->p_hdr[j+1].p_filesz;
                 manager->p_hdr[j+1].p_offset += MAGIC_NUMBER + manager->p_hdr[j].p_filesz;
-                manager->p_hdr[j+1].p_vaddr = manager->p_hdr[j+1].p_offset;
-                manager->p_hdr[j+1].p_paddr = manager->p_hdr[j+1].p_offset;
+                // manager->p_hdr[j+1].p_vaddr = manager->p_hdr[j+1].p_offset;
+                // manager->p_hdr[j+1].p_paddr = manager->p_hdr[j+1].p_offset;
+
+                manager->p_hdr[j+1].p_vaddr = manager->p_hdr[j].p_memsz;
+                manager->p_hdr[j+1].p_paddr = manager->p_hdr[j].p_memsz;
 
                 bump_by++;
             }
