@@ -512,6 +512,64 @@ void change_debug(Elf64_Manager* manager) {
     }
 }
 
+void find_gaps_in_elf64_file(Elf64_Manager* manager, int** gap_start_final, int** gap_size_final, int* gap_count){
+    for(int i = 1; i < manager->e_hdr.e_shnum;i++){
+        if(manager->s_hdr[i].sh_offset < manager->s_hdr[i-1].sh_offset){
+            printf("Section in table are not ordered by offset, exiting\n");
+            free_manager64(manager);
+            return 1;
+        }
+    }
+
+    int current = manager->e_hdr.e_phoff;
+    int size = manager->e_hdr.e_phnum * manager->e_hdr.e_phentsize;
+
+    int num_gaps = 0;
+
+    int* gap_start = malloc(num_gaps*sizeof(int));
+    int* gap_size = malloc(num_gaps*sizeof(int));
+
+
+    if(current+size < manager->s_hdr[1].sh_offset){
+        num_gaps++;
+        gap_start = realloc(gap_start,num_gaps*sizeof(int));
+        gap_size = realloc(gap_size,num_gaps*sizeof(int));
+        gap_start[num_gaps-1] = current+size;
+        gap_size[num_gaps-1] = manager->s_hdr[1].sh_offset - (current+size);
+    }
+
+
+    for(int i = 2; i < manager->e_hdr.e_shnum;i++){
+        current = manager->s_hdr[i-1].sh_offset;
+        size = manager->s_hdr[i-1].sh_size;
+        if(current+size < manager->s_hdr[i].sh_offset){
+            num_gaps++;
+            gap_start = realloc(gap_start,num_gaps*sizeof(int));
+            gap_size = realloc(gap_size,num_gaps*sizeof(int));
+            gap_start[num_gaps-1] = current+size;
+            gap_size[num_gaps-1] = manager->s_hdr[i].sh_offset - (current+size);
+        }
+    }
+
+    current = manager->s_hdr[manager->e_hdr.e_shnum-1].sh_offset;
+    size = manager->s_hdr[manager->e_hdr.e_shnum-1].sh_size;
+    if(current+size < manager->e_hdr.e_shoff){
+        num_gaps++;
+        gap_start = realloc(gap_start,num_gaps*sizeof(int));
+        gap_size = realloc(gap_size,num_gaps*sizeof(int));
+        gap_start[num_gaps-1] = current+size;
+        gap_size[num_gaps-1] = manager->e_hdr.e_shoff - (current+size);
+    }
+
+    for(int i = 0; i < num_gaps; i++){
+        printf("Gap: %x - %x\n",gap_start[i],gap_size[i]+gap_start[i]);
+    }
+
+    * gap_count = num_gaps;
+    *gap_start_final = gap_start;
+    *gap_size_final = gap_size;
+}
+
 
 
 

@@ -13,6 +13,9 @@ typedef struct elf64_manager {
 
 Elf64_Manager* initialize_manager64(int num_phdr, int num_shdr);
 
+//gap_start and gap_size will have their size realloacted based on the number of gaps, need to free them
+void find_gaps_in_elf64_file(Elf64_Manager* manager, int** gap_start, int** gap_size, int* gap_count);
+
 void free_manager64(Elf64_Manager* manager);
 
 int append_new_section(Elf64_Manager* manager, int section_size);
