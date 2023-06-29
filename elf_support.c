@@ -465,71 +465,86 @@ void free_seg_table(Elf64_Manager* manager, struct seg_sect* seg_table) {
 }
 
 //changes all note section's bytes with 4s
-void change_note(Elf64_Manager* manager) {
+int* find_note(Elf64_Manager* manager) {
     uint8_t* string_table_file_section = manager->file_sections[manager->e_hdr.e_shstrndx];
+    int* indexes = malloc(sizeof(int));
+    int counter = 1;
     for (int i = 0; i < manager->e_hdr.e_shnum; i++) {
         Elf64_Shdr section = manager->s_hdr[i];
         char* found = string_table_file_section + section.sh_name;
         if (strncmp(".note", found, 5) == 0) {
-            printf("%lx\n", section.sh_offset);
-            uint8_t* file_section = manager->file_sections[i];
-            for (int j = 0; j < section.sh_size; j++) {
-                file_section[j] = 4;
-            }
+            printf(".note: %lx\n", section.sh_offset);
+            indexes[counter - 1] = i;
+            counter++;
+            void* ptr = realloc(indexes, sizeof(int) * counter);
+                if (ptr == NULL) {
+                    printf("Insufficient memory during realloc\n");
+                    return NULL;
+                }
+            indexes = ptr;
         }
     }
+    indexes[counter - 1] = -1; //creating terminator value at end of array
+    return indexes;
 }
 
 //changes comment section's bytes with 4s
-void change_comment(Elf64_Manager* manager) {
+int find_comment(Elf64_Manager* manager) {
     uint8_t* string_table_file_section = manager->file_sections[manager->e_hdr.e_shstrndx];
     for (int i = 0; i < manager->e_hdr.e_shnum; i++) {
         Elf64_Shdr section = manager->s_hdr[i];
         char* found = string_table_file_section + section.sh_name;
         if (strcmp(".comment", found) == 0) {
-            printf("%lx\n", section.sh_offset);
-            uint8_t* file_section = manager->file_sections[i];
-            for (int j = 0; j < section.sh_size; j++) {
-                file_section[j] = 4;
-            }
+            printf(".comment: %lx\n", section.sh_offset);
+            return i;
         }
     }
+    return -1;
 }
 
 //changes debug section's bytes with 4s
-void change_debug(Elf64_Manager* manager) {
+int find_debug(Elf64_Manager* manager) {
     uint8_t* string_table_file_section = manager->file_sections[manager->e_hdr.e_shstrndx];
     for (int i = 0; i < manager->e_hdr.e_shnum; i++) {
         Elf64_Shdr section = manager->s_hdr[i];
         char* found = string_table_file_section + section.sh_name;
         if (strcmp(".debug", found) == 0) {
-            printf("%lx\n", section.sh_offset);
-            uint8_t* file_section = manager->file_sections[i];
-            for (int j = 0; j < section.sh_size; j++) {
-                file_section[j] = 4;
-            }
+            printf(".debug: %lx\n", section.sh_offset);
+            return i;
+        }
+    }
+    return -1;
+}
+
+int return_dynamic_size(Elf64_Manager* manager) {
+    int cutoff;
+    int file_size;
+    for (int i = 0; i < manager->e_hdr.e_phnum; i++) {
+        Elf64_Phdr segment = manager->p_hdr[i];
+        if (segment.p_type == 2) {
+            cutoff = segment.p_offset;
+            file_size = segment.p_filesz;
+            return file_size;
         }
     }
 }
 
-void extend_dynamic_segment(Elf64_Manager* manager, struct seg_sect* seg_table, FILE* fp) {
+int extend_dynamic_segment(Elf64_Manager* manager, Elf64_Xword ADDENDUM) {
     int cutoff;
     int file_size;
     for (int i = 0; i < manager->e_hdr.e_phnum; i++) {
         Elf64_Phdr segment = manager->p_hdr[i];
         if (segment.p_type == 2) { //will need to change this for PT_LOAD segment
-            printf("Segment %i of offset %lx and size %lx\n", i, segment.p_offset, segment.p_filesz);
             cutoff = segment.p_offset;
             file_size = segment.p_filesz;
-            manager->p_hdr[i].p_filesz += ADDENDUM; //remove this until later until you find the last PT_LOAD segment
+            manager->p_hdr[i].p_filesz += ADDENDUM;
             break;
         }
     }
     int dynam_section;
     for (int i = 0; i < manager->e_hdr.e_shnum; i++) {
         Elf64_Shdr section = manager->s_hdr[i];
-        if (section.sh_offset >= cutoff && section.sh_offset < cutoff + file_size) { //going to need to change this part (maybe) in case there is multiple sections in the segment, and so make an array, append all of the sections that satisfy this condition, and choose the last one's offset + file_size as the place to insert new bytes
-            printf("%lx\n", section.sh_offset);
+        if (section.sh_offset >= cutoff && section.sh_offset < cutoff + file_size) {
             dynam_section = i;
         }
     }
@@ -537,12 +552,11 @@ void extend_dynamic_segment(Elf64_Manager* manager, struct seg_sect* seg_table, 
     void* ptr = realloc(manager->file_sections[dynam_section], sizeof(uint8_t*) * (file_size + ADDENDUM));
     if (ptr == NULL) {
         printf("Insufficient memory during realloc\n");
-        return;
+        return -1;
     }
     manager->file_sections[dynam_section] = ptr;
     manager->s_hdr[dynam_section].sh_size += ADDENDUM;
 
-    printf("%x\n", dynam_section);
     uint8_t* section = manager->file_sections[dynam_section];
     for (int i = file_size; i < file_size + ADDENDUM; i++) {
         section[i] = 4;
@@ -552,19 +566,18 @@ void extend_dynamic_segment(Elf64_Manager* manager, struct seg_sect* seg_table, 
     for (int i = 0; i < manager->e_hdr.e_phnum; i++) {
         Elf64_Phdr segment = manager->p_hdr[i];
         if (segment.p_offset >= cutoff + file_size) {
-            printf("segment");
             manager->p_hdr[i].p_offset += ADDENDUM;
         }
     }
     for (int i = 0; i < manager->e_hdr.e_shnum; i++) {
         Elf64_Shdr section = manager->s_hdr[i];
         if (section.sh_offset >= cutoff + file_size) {
-            printf("yay\n");
             manager->s_hdr[i].sh_offset += ADDENDUM;
         }
     }
-
     manager->e_hdr.e_shoff += ADDENDUM;
+
+    return dynam_section;
 }
 
 void find_gaps_in_elf64_file(Elf64_Manager* manager, int** gap_start_final, int** gap_size_final, int* gap_count){
@@ -572,7 +585,7 @@ void find_gaps_in_elf64_file(Elf64_Manager* manager, int** gap_start_final, int*
         if(manager->s_hdr[i].sh_offset < manager->s_hdr[i-1].sh_offset){
             printf("Section in table are not ordered by offset, exiting\n");
             free_manager64(manager);
-            return 1;
+            return;
         }
     }
 
@@ -620,13 +633,125 @@ void find_gaps_in_elf64_file(Elf64_Manager* manager, int** gap_start_final, int*
         printf("Gap: %x - %x\n",gap_start[i],gap_size[i]+gap_start[i]);
     }
 
-    * gap_count = num_gaps;
+    *gap_count = num_gaps;
     *gap_start_final = gap_start;
     *gap_size_final = gap_size;
 }
 
+void change_elf_header(Elf64_Manager* malware, uint8_t value, char* buffer, char* argv) {
+    strcpy(buffer,argv);
 
+    malware->e_hdr.e_flags = value;
+    for(int i = 7; i < 16; i++){
+        malware->e_hdr.e_ident[i] = value;
+    }
 
+    strcat(buffer,"_eflags_eident");
+    write_elf64_file(malware, buffer);
+    free_manager64(malware);
+}
+
+void append_value(Elf64_Manager* malware, uint8_t value, char* buffer, char* argv) {
+    strcpy(buffer,argv);
+
+    int new_section_index = append_new_section(malware, 1024*1024);
+
+    uint8_t* file_section = malware->file_sections[new_section_index];
+    Elf64_Xword section_size = malware->s_hdr[new_section_index].sh_size;
+
+    for(int i = 0; i < section_size; i++){
+        file_section[i] = value;
+    }
+
+    strcat(buffer,"_append_fours");
+    write_elf64_file(malware, buffer);
+    free_manager64(malware);
+}
+
+void append_benign_x1(Elf64_Manager* malware, Elf64_Manager* benign, int text_section_index, Elf64_Xword text_section_size, char* buffer, char* argv) {
+    strcpy(buffer,argv);
+
+    int new_section_index = append_new_section(malware, text_section_size);
+    memcpy(malware->file_sections[new_section_index], benign->file_sections[text_section_index], text_section_size);
+
+    strcat(buffer,"_append_benign_x1");
+    write_elf64_file(malware, buffer);
+    free_manager64(malware);
+}
+
+void append_benign_x10(Elf64_Manager* malware, Elf64_Manager* benign, int text_section_index, Elf64_Xword text_section_size, char* buffer, char* argv) {
+    strcpy(buffer,argv);
+
+    for(int i = 0; i < 10; i++){
+        int new_section_index = append_new_section(malware, text_section_size);
+        memcpy(malware->file_sections[new_section_index],benign->file_sections[text_section_index], text_section_size);
+    }
+
+    strcat(buffer,"_append_benign_x10");
+    write_elf64_file(malware, buffer);
+    free_manager64(malware);
+}   
+
+void write_extended_dynamic(Elf64_Manager* malware, Elf64_Manager* benign, int text_section_index, Elf64_Xword text_section_size, char* buffer, char* argv) {
+    strcpy(buffer,argv);
+
+    int cut_text_section_size = text_section_size - (text_section_size % 4096); //for alignment purposes
+
+    int dynamic_section_size = return_dynamic_size(malware);
+    int dynamic_section_index = extend_dynamic_segment(malware, cut_text_section_size);
+
+    memcpy(malware->file_sections[dynamic_section_index] + dynamic_section_size, benign->file_sections[text_section_index], cut_text_section_size);
+
+    strcat(buffer,"_extend_dynamic");
+    write_elf64_file(malware, buffer);
+    free_manager64(malware);
+}
+
+void change_note_section(Elf64_Manager* malware, Elf64_Manager* benign, int text_section_index) {
+    int* note_section_indexes = find_note(malware);
+    int i = 0;
+    if (note_section_indexes[0] == -1) {
+        puts(".note not present");
+        return;
+    }
+    while(note_section_indexes[i] != -1) {
+        int current_index = note_section_indexes[i];
+        memcpy(malware->file_sections[current_index], benign->file_sections[text_section_index], malware->s_hdr[current_index].sh_size);
+        i++;
+    }
+}
+
+void change_comment_section(Elf64_Manager* malware, Elf64_Manager* benign, int text_section_index) {
+    int comment_section_index = find_comment(malware);
+    if (comment_section_index != -1) {
+        memcpy(malware->file_sections[comment_section_index], benign->file_sections[text_section_index], malware->s_hdr[comment_section_index].sh_size);
+    }
+    else {
+        puts(".comment not present");
+    }
+}
+
+void change_debug_section(Elf64_Manager* malware, Elf64_Manager* benign, int text_section_index) {
+    int debug_section_index = find_debug(malware);
+    if (debug_section_index != -1) {
+        memcpy(malware->file_sections[debug_section_index], benign->file_sections[text_section_index], malware->s_hdr[debug_section_index].sh_size);
+    }
+    else {
+        puts(".debug not present");
+    }
+}
+
+void change_note_comment_debug(Elf64_Manager* malware, Elf64_Manager* benign, int text_section_index, char* buffer, char* argv) {
+    strcpy(buffer,argv);
+
+    change_note_section(malware, benign, text_section_index);
+    change_comment_section(malware, benign, text_section_index);
+    change_debug_section(malware, benign, text_section_index);
+
+    strcat(buffer,"_note_comment_debug");
+    write_elf64_file(malware, buffer);
+    free_manager64(malware);
+}
 
 void write_elf64_file(Elf64_Manager* manager, char* file_path){
     char* folder = "ModifiedElfOutput/"; 

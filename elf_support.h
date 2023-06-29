@@ -63,11 +63,23 @@ void print_sections_in_segments(Elf64_Manager* manager, FILE* fp);
 struct seg_sect* segment_table(Elf64_Manager* manager);
 void free_seg_table(Elf64_Manager* manager, struct seg_sect* seg_table);
 
-void change_note(Elf64_Manager* manager);
-void change_comment(Elf64_Manager* manager);
-void change_debug(Elf64_Manager* manager);
+int* find_note(Elf64_Manager* manager);
+int find_comment(Elf64_Manager* manager);
+int find_debug(Elf64_Manager* manager);
 
-void extend_dynamic_segment(Elf64_Manager* manager, struct seg_sect* seg_table, FILE* fp);
+int return_dynamic_size(Elf64_Manager* manager);
+int extend_dynamic_segment(Elf64_Manager* manager, Elf64_Xword ADDENDUM);
+
+void change_elf_header(Elf64_Manager* malware, uint8_t value, char* buffer, char* argv);
+void append_value(Elf64_Manager* malware, uint8_t value, char* buffer, char* argv);
+void append_benign_x1(Elf64_Manager* malware, Elf64_Manager* benign, int text_section_index, Elf64_Xword text_section_size, char* buffer, char* argv);
+void append_benign_x10(Elf64_Manager* malware, Elf64_Manager* benign, int text_section_index, Elf64_Xword text_section_size, char* buffer, char* argv);
+void write_extended_dynamic(Elf64_Manager* malware, Elf64_Manager* benign, int text_section_index, Elf64_Xword text_section_size, char* buffer, char* argv);
+void change_note_section(Elf64_Manager* malware, Elf64_Manager* benign, int text_section_index);
+void change_comment_section(Elf64_Manager* malware, Elf64_Manager* benign, int text_section_index);
+void change_debug_section(Elf64_Manager* malware, Elf64_Manager* benign, int text_section_index);
+void change_note_comment_debug(Elf64_Manager* malware, Elf64_Manager* benign, int text_section_index, char* buffer, char* argv);
+
 
 void write_elf64_file(Elf64_Manager* manager, char* file_path);
 void write_elf64_file_v2(Elf64_Manager* manager, char* file_path);
