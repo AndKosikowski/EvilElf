@@ -580,12 +580,26 @@ int extend_dynamic_segment(Elf64_Manager* manager, Elf64_Xword ADDENDUM) {
     return dynam_section;
 }
 
+int section_offset_sort(const void *a, const void *b){
+    Elf64_Shdr x = *(Elf64_Shdr *) a;
+    Elf64_Shdr y = *(Elf64_Shdr *) b;
+    //just x-y doesn't work due to difference in number of bytes of types
+    if ((x.sh_offset - y.sh_offset) < 0) return -1;
+    if (x.sh_offset == y.sh_offset) return 0;
+    return 1;
+}
+
 void find_gaps_in_elf64_file(Elf64_Manager* manager, int** gap_start_final, int** gap_size_final, int* gap_count){
+
+
+
+
+
     for(int i = 1; i < manager->e_hdr.e_shnum;i++){
         if(manager->s_hdr[i].sh_offset < manager->s_hdr[i-1].sh_offset){
-            printf("Section in table are not ordered by offset, exiting\n");
-            free_manager64(manager);
-            return;
+            printf("Section in table are not ordered by offset, sorting them\n");
+            qsort(manager->s_hdr, manager->e_hdr.e_shnum,sizeof(void*),section_offset_sort);
+            break;
         }
     }
 
@@ -645,8 +659,9 @@ void change_elf_header(Elf64_Manager* malware, uint8_t value, char* buffer, char
     for(int i = 7; i < 16; i++){
         malware->e_hdr.e_ident[i] = value;
     }
-
-    strcat(buffer,"_eflags_eident");
+    char buffer2[19];
+    snprintf(buffer2,30,"_eflags_eident_%d",value);
+    strcat(buffer,buffer2);
     write_elf64_file(malware, buffer);
     free_manager64(malware);
 }
@@ -662,8 +677,10 @@ void append_value(Elf64_Manager* malware, uint8_t value, char* buffer, char* arg
     for(int i = 0; i < section_size; i++){
         file_section[i] = value;
     }
-
-    strcat(buffer,"_append_fours");
+    char buffer2[4];
+    snprintf(buffer2,4, "%d",value);
+    strcat(buffer,"_append_");
+    strcat(buffer,buffer2);
     write_elf64_file(malware, buffer);
     free_manager64(malware);
 }
