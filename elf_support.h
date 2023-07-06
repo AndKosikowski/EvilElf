@@ -3,7 +3,7 @@
 #include <elf.h>
 #include <stdio.h>
 
-#ifndef IS_64_Bit
+#ifndef IS_32_Bit
 typedef Elf64_Ehdr Elf_Ehdr;
 typedef Elf64_Shdr Elf_Shdr;
 typedef Elf64_Phdr Elf_Phdr;
