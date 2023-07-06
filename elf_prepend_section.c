@@ -16,7 +16,7 @@ int main(int argc, char** argv){
 
     int MAGIC_NUMBER = 4096;
 
-    Elf64_Manager* manager = load_elf64_file(argv[1]);
+    Elf_Manager* manager = load_elf_file(argv[1]);
 
     printf("Page size: %d\n", getpagesize());
 
@@ -27,7 +27,7 @@ int main(int argc, char** argv){
     int how_to_change_phentry[phnum];//0 dont change, 1 update vaddr, 2 needs to be split and update vaddr
 
     for(int i = 0; i < phnum; i++){
-        Elf64_Phdr phdr = manager->p_hdr[i];
+        Elf_Phdr phdr = manager->p_hdr[i];
         if (phdr.p_offset < manager->e_hdr.e_phoff + manager->e_hdr.e_phentsize*manager->e_hdr.e_phnum){
             char buffer[32];
             get_program_type(buffer,phdr.p_type);
@@ -50,14 +50,14 @@ int main(int argc, char** argv){
     //Not implemented efficiently at all, could be swapped to pointer to pointers, linked list, etc to be faster
     manager->e_hdr.e_shnum++;
     manager->e_hdr.e_shstrndx++;
-    void* ptr = realloc(manager->s_hdr, sizeof(Elf64_Shdr)*manager->e_hdr.e_shnum);
+    void* ptr = realloc(manager->s_hdr, sizeof(Elf_Shdr)*manager->e_hdr.e_shnum);
     if(ptr == NULL){
         printf("Realloc failed when adding new section\n");
         return 1;
     }
     manager->s_hdr = ptr;
 
-    memmove(manager->s_hdr+2, manager->s_hdr+1, sizeof(Elf64_Shdr) * (manager->e_hdr.e_shnum-2));
+    memmove(manager->s_hdr+2, manager->s_hdr+1, sizeof(Elf_Shdr) * (manager->e_hdr.e_shnum-2));
 
 
     //This isn't that bad as it's just pointers
@@ -70,18 +70,18 @@ int main(int argc, char** argv){
 
     memmove(manager->file_sections+2, manager->file_sections+1, sizeof(uint8_t *) * (manager->e_hdr.e_shnum-2));
 
-    memcpy(manager->s_hdr+1, manager->s_hdr+2, sizeof(Elf64_Shdr));
+    memcpy(manager->s_hdr+1, manager->s_hdr+2, sizeof(Elf_Shdr));
 
-    Elf64_Shdr* shdr = &(manager->s_hdr[1]);
+    Elf_Shdr* shdr = &(manager->s_hdr[1]);
     shdr->sh_size=MAGIC_NUMBER;
 
-    Elf64_Off inserted_offset = manager->s_hdr[1].sh_offset;
+    Elf_Off inserted_offset = manager->s_hdr[1].sh_offset;
     
     // for(int i = 1; i < manager->e_hdr.e_shnum; i++){
-    //     manager->s_hdr[i].sh_offset += sizeof(Elf64_Phdr);
+    //     manager->s_hdr[i].sh_offset += sizeof(Elf_Phdr);
     // }
 
-    // manager->e_hdr.e_shoff += sizeof(Elf64_Phdr);
+    // manager->e_hdr.e_shoff += sizeof(Elf_Phdr);
 
     for(int i = 2; i < manager->e_hdr.e_shnum;i++){
         manager->s_hdr[i].sh_offset += MAGIC_NUMBER;
@@ -115,33 +115,33 @@ int main(int argc, char** argv){
                     return 1;
                 }
                 manager->e_hdr.e_phnum++;
-                manager->p_hdr[0].p_filesz += sizeof(Elf64_Phdr);
-                manager->p_hdr[0].p_memsz += sizeof(Elf64_Phdr);
+                manager->p_hdr[0].p_filesz += sizeof(Elf_Phdr);
+                manager->p_hdr[0].p_memsz += sizeof(Elf_Phdr);
 
-                void* ptr = realloc(manager->p_hdr, sizeof(Elf64_Phdr)*manager->e_hdr.e_phnum);
+                void* ptr = realloc(manager->p_hdr, sizeof(Elf_Phdr)*manager->e_hdr.e_phnum);
                 if(ptr == NULL){
                     printf("Realloc failed when adding new section\n");
                     return 1;
                 }
                 manager->p_hdr = ptr;
 
-                memmove(manager->p_hdr+j+1, manager->p_hdr+j, sizeof(Elf64_Phdr) * (manager->e_hdr.e_phnum - j - 1));
+                memmove(manager->p_hdr+j+1, manager->p_hdr+j, sizeof(Elf_Phdr) * (manager->e_hdr.e_phnum - j - 1));
 
-                memcpy(manager->p_hdr+j, manager->p_hdr+j+1, sizeof(Elf64_Phdr));
+                memcpy(manager->p_hdr+j, manager->p_hdr+j+1, sizeof(Elf_Phdr));
 
                 for(int k = 1; k < manager->e_hdr.e_phnum; k++){
                     if(manager->p_hdr[k].p_offset > manager->p_hdr[0].p_offset){
-                        manager->p_hdr[k].p_offset += sizeof(Elf64_Phdr);
-                        // manager->p_hdr[k].p_vaddr += sizeof(Elf64_Phdr);//These two might be wrong (this and below)
-                        // manager->p_hdr[k].p_paddr += sizeof(Elf64_Phdr);
+                        manager->p_hdr[k].p_offset += sizeof(Elf_Phdr);
+                        // manager->p_hdr[k].p_vaddr += sizeof(Elf_Phdr);//These two might be wrong (this and below)
+                        // manager->p_hdr[k].p_paddr += sizeof(Elf_Phdr);
                         
                     }
                     
                 }
 
-                manager->e_hdr.e_shoff += sizeof(Elf64_Phdr);
+                manager->e_hdr.e_shoff += sizeof(Elf_Phdr);
                 for(int i = 1; i < manager->e_hdr.e_shnum; i++){
-                    manager->s_hdr[i].sh_offset += sizeof(Elf64_Phdr);
+                    manager->s_hdr[i].sh_offset += sizeof(Elf_Phdr);
                 }
 
 
@@ -164,9 +164,9 @@ int main(int argc, char** argv){
         }
     }
 
-    print_all_elf64_program_header(manager);
+    print_all_elf_program_header(manager);
 
-    write_elf64_file(manager, argv[1]);
-    free_manager64(manager);
+    write_elf_file(manager, argv[1]);
+    free_manager(manager);
     return 0;
 }

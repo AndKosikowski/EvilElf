@@ -21,7 +21,7 @@ int main(int argc, char** argv){
     }
     uint8_t value = arg;
 
-    Elf64_Manager* manager = load_elf64_file(argv[1]);
+    Elf_Manager* manager = load_elf_file(argv[1]);
 
     manager->e_hdr.e_flags = value;
     for(int i = 7; i < 16; i++){
@@ -38,12 +38,12 @@ int main(int argc, char** argv){
 
     
 
-    write_elf64_file(manager,argv[1]);
+    write_elf_file(manager,argv[1]);
 
     int* gap_start;
     int* gap_size;
     int gap_count = 0;
-    find_gaps_in_elf64_file(manager, &gap_start,&gap_size,&gap_count);
+    find_gaps_in_elf_file(manager, &gap_start,&gap_size,&gap_count,1);
 
     char* folder = "ModifiedElfOutput/"; 
 
@@ -72,7 +72,7 @@ int main(int argc, char** argv){
     free(gap_size);
     free(gap_start);
 
-    free_manager64(manager);
+    free_manager(manager);
 
     return 0;
 }

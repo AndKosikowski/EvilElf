@@ -8,7 +8,7 @@ int main(int argc, char** argv){
         printf("Need to specify a path to a file as an argument\n");
         return 1;
     }
-    Elf64_Manager* manager = load_elf64_file(argv[1]);
+    Elf_Manager* manager = load_elf_file(argv[1]);
     printf("Loaded file\n");
 
     
@@ -16,7 +16,7 @@ int main(int argc, char** argv){
     for(int i = 1; i < manager->e_hdr.e_shnum;i++){
         if(manager->s_hdr[i].sh_offset < manager->s_hdr[i-1].sh_offset){
             printf("Section in table are not ordered by offset, exiting\n");
-            free_manager64(manager);
+            free_manager(manager);
             return 1;
         }
     }
@@ -68,7 +68,7 @@ int main(int argc, char** argv){
 
 
 
-    write_elf64_file(manager, argv[1]);
+    write_elf_file(manager, argv[1]);
 
     char* folder = "ModifiedElfOutput/"; 
 
@@ -97,7 +97,7 @@ int main(int argc, char** argv){
     free(gap_size);
     free(gap_start);
 
-    free_manager64(manager);
+    free_manager(manager);
 
     return 0;
 }

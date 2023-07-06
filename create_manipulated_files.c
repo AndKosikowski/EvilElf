@@ -25,12 +25,12 @@ int main(int argc, char** argv){
         return 2;
     }
 
-    Elf64_Manager* malware = load_elf64_file(argv[1]);
-    Elf64_Manager* benign = load_elf64_file(argv[2]);
+    Elf_Manager* malware = load_elf_file(argv[1]);
+    Elf_Manager* benign = load_elf_file(argv[2]);
 
     uint8_t user_value = arg;
     int text_section_index = get_next_section_index_by_name(benign,".text",0);
-    Elf64_Xword text_section_size = benign->s_hdr[text_section_index].sh_size;
+    Elf_Xword text_section_size = benign->s_hdr[text_section_index].sh_size;
 
     char buffer[strlen(argv[1])+40];
     uint8_t user_loop_value = user_value;
@@ -39,7 +39,7 @@ int main(int argc, char** argv){
     int* gap_start;
     int* gap_size;
     int gap_count = 0;
-    find_gaps_in_elf64_file(malware, &gap_start,&gap_size,&gap_count,0);
+    find_gaps_in_elf_file(malware, &gap_start,&gap_size,&gap_count,0);
 
     for(int i = 0; i < loop_count; i++){
         
@@ -47,11 +47,11 @@ int main(int argc, char** argv){
         change_elf_header(malware, user_loop_value, buffer, argv[1]);
 
         //inserting values to new section at end of malware file
-        malware = load_elf64_file(argv[1]);
+        malware = load_elf_file(argv[1]);
         append_value(malware, user_loop_value, buffer, argv[1]);
 
         //changing the gaps between segments/sections
-        malware = load_elf64_file(argv[1]);
+        malware = load_elf_file(argv[1]);
         
 
         char* folder = "ModifiedElfOutput/"; 
@@ -65,7 +65,7 @@ int main(int argc, char** argv){
         snprintf(buffer2,4,"%d",user_loop_value);
         strcat(output_path,buffer2);
 
-        write_elf64_file(malware, output_path+18);
+        write_elf_file(malware, output_path+18);
         printf("%s\n",output_path);
         FILE* fp = fopen(output_path, "r+b");
         if(fp == NULL){
@@ -90,24 +90,24 @@ int main(int argc, char** argv){
     free(gap_start);
 
     //inserting benign text section to new section at end of malware file
-    malware = load_elf64_file(argv[1]);
+    malware = load_elf_file(argv[1]);
     append_benign_x1(malware, benign, text_section_index, text_section_size, buffer, argv[1]);
 
     //inserting benign text section ten times
-    malware = load_elf64_file(argv[1]);
+    malware = load_elf_file(argv[1]);
     append_benign_x10(malware, benign, text_section_index, text_section_size, buffer, argv[1]);
 
     //extending dynamic segment and inserting benign text section
-    malware = load_elf64_file(argv[1]);
+    malware = load_elf_file(argv[1]);
     write_extended_dynamic(malware, benign, text_section_index, text_section_size, buffer, argv[1]);
 
     //changing note, comment, debug sections if the exist
-    malware = load_elf64_file(argv[1]);
+    malware = load_elf_file(argv[1]);
     change_note_comment_debug(malware, benign, text_section_index, buffer, argv[1]);
 
 
     
 
-    free_manager64(benign);
+    free_manager(benign);
     return 0;
 }

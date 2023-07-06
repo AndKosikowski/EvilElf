@@ -6,7 +6,7 @@ int main(int argc, char** argv){
         printf("Need to specify a path to a file as an argument\n");
         return 1;
     }
-    Elf64_Manager* manager = load_elf64_file(argv[1]);
+    Elf_Manager* manager = load_elf_file(argv[1]);
 
     manager->e_hdr.e_flags = 420042;
 
@@ -16,7 +16,7 @@ int main(int argc, char** argv){
     
 
 
-    write_elf64_file(manager, argv[1]);
-    free_manager64(manager);
+    write_elf_file(manager, argv[1]);
+    free_manager(manager);
     return 0;
 }
