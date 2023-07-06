@@ -97,7 +97,6 @@ void free_manager32(Elf32_Manager* manager){
 
 void load_elf64_file_sections(Elf64_Manager* manager){
     FILE* fp = fopen(manager->file_path, "r+b"); 
-    printf("Loading sections\n");
     for(int i = 0; i < manager->e_hdr.e_shnum; i++){
         Elf64_Off offset = manager->s_hdr[i].sh_offset;
         fseek(fp, offset, SEEK_SET);
@@ -111,6 +110,13 @@ void load_elf64_file_sections(Elf64_Manager* manager){
         fread(manager->file_sections[i], manager->s_hdr[i].sh_size, 1, fp);
     }
     fclose(fp);
+}
+
+void print_elf64_header_table_overview(Elf64_Manager* manager){
+    Elf64_Ehdr hdr = manager->e_hdr;
+    printf("Number of program headers: %d\nNumber of section headers: %d\n",hdr.e_phnum,hdr.e_shnum);
+    printf("Program Header Offset: %#lx, size %#x\n",hdr.e_phoff, hdr.e_phentsize*hdr.e_phnum);
+    printf("Section Header Offset: %#lx, size %#x\n",hdr.e_shoff, hdr.e_shentsize*hdr.e_shnum);
 }
 
 //Currently takes an ELF file and parses it into a struct of elf headers and tables
@@ -132,10 +138,6 @@ Elf64_Manager* load_elf64_file(char* file_path){
     strncpy(manager->file_path,file_path,4095);
     manager->file_path[4095] = '\0';
     memcpy(&(manager->e_hdr), &hdr, sizeof(Elf64_Ehdr));
-
-    printf("Number of program headers: %d\nNumber of section headers: %d\n",hdr.e_phnum,hdr.e_shnum);
-    printf("Program Header Offset: %#lx, size %#x\n",hdr.e_phoff, hdr.e_phentsize*hdr.e_phnum);
-    printf("Section Header Offset: %#lx, size %#x\n",hdr.e_shoff, hdr.e_shentsize*hdr.e_shnum);
 
     fseek(fp,hdr.e_phoff ,SEEK_SET);
     
@@ -169,7 +171,7 @@ int get_file_name_size_from_path(char* file_path){
     int length = strlen(file_path);
     for(int i = length -1; i > 0; i--){
         if(file_path[i] == '/' || file_path[i] == '\\'){
-            return length-i+1;
+            return length-i-1;
         }
     }
     return length;
@@ -589,12 +591,8 @@ int section_offset_sort(const void *a, const void *b){
     return 1;
 }
 
-void find_gaps_in_elf64_file(Elf64_Manager* manager, int** gap_start_final, int** gap_size_final, int* gap_count){
-
-
-
-
-
+void find_gaps_in_elf64_file(Elf64_Manager* manager, int** gap_start_final, int** gap_size_final, int* gap_count, int display){
+    //Might have an SHT_NOBITS issue for finding gaps when SHT_NOBITS size is non zero as it shares the same offset as SHT_PROGBITS
     for(int i = 1; i < manager->e_hdr.e_shnum;i++){
         if(manager->s_hdr[i].sh_offset < manager->s_hdr[i-1].sh_offset){
             printf("Section in table are not ordered by offset, sorting them\n");
@@ -643,8 +641,10 @@ void find_gaps_in_elf64_file(Elf64_Manager* manager, int** gap_start_final, int*
         gap_size[num_gaps-1] = manager->e_hdr.e_shoff - (current+size);
     }
 
-    for(int i = 0; i < num_gaps; i++){
-        printf("Gap: %x - %x\n",gap_start[i],gap_size[i]+gap_start[i]);
+    if(display){
+        for(int i = 0; i < num_gaps; i++){
+            printf("Gap: %x - %x\n",gap_start[i],gap_size[i]+gap_start[i]);
+        }
     }
 
     *gap_count = num_gaps;
@@ -780,10 +780,9 @@ void write_elf64_file(Elf64_Manager* manager, char* file_path){
     int size = get_file_name_size_from_path(file_path);
     char output_path[19+size];
     strcpy(output_path, folder);
-
     strcat(output_path, file_path+strlen(file_path)-size);
 
-    printf("made output_path %s\n",output_path);
+    // printf("made output_path %s\n",output_path);
     
     FILE* fp;
 
@@ -808,6 +807,9 @@ void write_elf64_file(Elf64_Manager* manager, char* file_path){
     }
 
     for(int i = 0; i < manager->e_hdr.e_shnum; i++){
+        if(manager->s_hdr[i].sh_type == 8){// SHT_NOBITS
+            continue;
+        }
         Elf64_Off offset = manager->s_hdr[i].sh_offset;
         Elf64_Xword size = manager->s_hdr[i].sh_size;
         fseek(fp, offset, SEEK_SET);

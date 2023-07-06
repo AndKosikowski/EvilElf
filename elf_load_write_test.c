@@ -7,7 +7,9 @@ int main(int argc, char** argv){
         return 1;
     }
     Elf64_Manager* manager = load_elf64_file(argv[1]);
-    printf("Loaded file\n");
+    printf("Loaded file: %s\n",manager->file_path);
+
+    print_elf64_header_table_overview(manager);
 
     print_all_elf64_program_header(manager);
     print_all_elf64_section_header(manager);

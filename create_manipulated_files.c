@@ -34,35 +34,39 @@ int main(int argc, char** argv){
 
     char buffer[strlen(argv[1])+40];
     uint8_t user_loop_value = user_value;
+
+
+    int* gap_start;
+    int* gap_size;
+    int gap_count = 0;
+    find_gaps_in_elf64_file(malware, &gap_start,&gap_size,&gap_count,0);
+
     for(int i = 0; i < loop_count; i++){
         
         //change e_flags and e_ident in ELF header
         change_elf_header(malware, user_loop_value, buffer, argv[1]);
 
-        //inserting 4's to new section at end of malware file
+        //inserting values to new section at end of malware file
         malware = load_elf64_file(argv[1]);
         append_value(malware, user_loop_value, buffer, argv[1]);
 
         //changing the gaps between segments/sections
         malware = load_elf64_file(argv[1]);
-        int* gap_start;
-        int* gap_size;
-        int gap_count = 0;
-        find_gaps_in_elf64_file(malware, &gap_start,&gap_size,&gap_count);
+        
 
         char* folder = "ModifiedElfOutput/"; 
 
-        int size = strlen(malware->file_path);
+        int size = get_file_name_size_from_path(malware->file_path);
         char output_path[18+size+6+4];
         strcpy(output_path, folder);
-        strcat(output_path, malware->file_path);
+        strcat(output_path, malware->file_path + strlen(malware->file_path)-size);
         strcat(output_path,"_gaps_");
         char buffer2[4];
         snprintf(buffer2,4,"%d",user_loop_value);
         strcat(output_path,buffer2);
 
         write_elf64_file(malware, output_path+18);
-
+        printf("%s\n",output_path);
         FILE* fp = fopen(output_path, "r+b");
         if(fp == NULL){
             printf("Output path was unable to be opened to fill gaps\n");
@@ -78,11 +82,12 @@ int main(int argc, char** argv){
         }
 
         fclose(fp);
-        free(gap_size);
-        free(gap_start);
-
+        
         user_loop_value = user_loop_value + 1;
     }
+
+    free(gap_size);
+    free(gap_start);
 
     //inserting benign text section to new section at end of malware file
     malware = load_elf64_file(argv[1]);
