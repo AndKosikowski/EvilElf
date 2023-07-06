@@ -102,8 +102,6 @@ Elf_Manager* load_elf_file(char* file_path){
     return manager;
 }
 
-
-
 int get_file_name_size_from_path(char* file_path){
     int length = strlen(file_path);
     for(int i = length -1; i > 0; i--){
