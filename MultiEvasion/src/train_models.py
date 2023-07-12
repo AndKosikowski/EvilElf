@@ -268,7 +268,7 @@ if __name__ == '__main__':
     parser.add_argument('--train_label_path',default='../data/train_data_label.csv',type=str,help='csv file of train file list')
     parser.add_argument('--test_label_path',default='../data/test_data_label.csv',type=str,help='csv file of test file list')
     parser.add_argument('--val_label_path',default='../data/val_data_label.csv',type=str,help='csv file of validation file list')
-    parser.add_argument('--all_file_path',default='../data/all_file/',type=str,help='path stored all files')
+    parser.add_argument('--all_file_path',default='../data/all_files/',type=str,help='path stored all files')
     parser.add_argument('--model_name',default='AvastNet',type=str,help='model name')
     parser.add_argument('--input_size',default=102400,type=int,help='input size of model')
     parser.add_argument('--window_size',default=512,type=int,help='window size of each cnn feature filter')
