@@ -106,7 +106,7 @@ int main(int argc, char** argv){
     change_note_comment_debug(malware, benign, text_section_index, buffer, argv[1]);
 
 
-    
+        
 
     free_manager(benign);
     return 0;
