@@ -1,7 +1,7 @@
 **
 **/
 !*.c
-!makefile
 !LICENSE
+!makefile
 !README.md
 !.gitignore
