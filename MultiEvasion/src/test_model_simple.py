@@ -48,8 +48,12 @@ class test_model:
         test_label_path = args.test_label_path
         test_data_path = args.test_data_path
 
-
-        input_size = int(self.model_name.split("_")[1])
+        input_size_string = self.model_name.split("_")[1].lower()
+        if 'k' in input_size_string:
+            input_size = int(input_size_string.replace('k',''))*1000
+        else:
+            input_size = int(input_size_string)
+        
 
         # data pre-process
         test_label_table = pd.read_csv(test_label_path, header=None, index_col=0)
