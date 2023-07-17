@@ -113,20 +113,17 @@ class test_model:
             print(f'AUC is {auc_value}',file=f)
 
 
-        ## plot roc curve
-        # font_size = 18
-        # plt.figure(figsize=(8, 6), dpi=150)
-        # plt.plot(fpr, tpr, color='red', linestyle='-', linewidth=2,
-        #          fillstyle='none',  label='ROC curve (area = %.3f)' % auc_value)
-        # plt.xlabel('False Positive Rate', {'size': font_size})
-        # plt.ylabel('True Positive Rate', {'size': font_size})
-        # plt.tick_params(labelsize=font_size)
-        # plt.legend(loc='best', fontsize=font_size)
-        # if args.test_label_path == '../data/test_data_label_phd.csv':
-        #     plt.savefig(args.result_path + args.model_name + str(args.input_size) + '_roc_curve_phd.eps')
-        # else:
-        #     plt.savefig(args.result_path + args.model_name + str(args.input_size) + '_roc_curve.eps')
-        # plt.show()
+        # plot roc curve
+        font_size = 18
+        plt.figure(figsize=(8, 6), dpi=150)
+        plt.plot(fpr, tpr, color='red', linestyle='-', linewidth=2,
+                 fillstyle='none',  label='ROC curve (area = %.3f)' % auc_value)
+        plt.xlabel('False Positive Rate', {'size': font_size})
+        plt.ylabel('True Positive Rate', {'size': font_size})
+        plt.tick_params(labelsize=font_size)
+        plt.legend(loc='best', fontsize=font_size)
+        plt.savefig(args.result_path + self.model_name[0:-4]  + '_roc_curve.eps')
+        plt.show()
 
 
 def get_model_type(file_name):
