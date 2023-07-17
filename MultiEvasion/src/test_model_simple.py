@@ -154,12 +154,10 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='test model',formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--model_path',default='../models/',type=str,help='model path')
-    parser.add_argument('--input_size',default=102400,type=int,help='input size')
-    parser.add_argument('--window_size',default=500,type=int,help='feature filter/window size of CNN')
     parser.add_argument('--batch_size',default=32,type=int,help='batch size')
     parser.add_argument('--use_cpu',default=1,type=int,help='number of cpu used')
     parser.add_argument('--test_label_path',default='../data/test_data_label.csv',type=str,help='path of test csv file')
-    parser.add_argument('--test_data_path',default='../data/all_file/',type=str,help='path for test files')
+    parser.add_argument('--test_data_path',default='../data/all_files/',type=str,help='path for test files')
     parser.add_argument('--result_path',default='../result/test_results/',type=str,help='parent path for results txt file')
 
     args = parser.parse_args()
