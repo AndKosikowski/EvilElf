@@ -1,0 +1,134 @@
+-------------------- Input Parameters --------------------
+Namespace(all_file_path='../data/all_files/', batch_size=32, checkpoint_dir='../checkpoint/', epochs=50, input_size=1000000, log_file_path='../models/malconv_1000k_even-split_0001_500_32_model_malconv.txt', lr=0.0001, model_name='malconv', num_workers=1, test_label_path='../data/TestEven_ELF_Dataset.csv', train_label_path='../data/TrainEven_ELF_Dataset.csv', val_label_path='../data/ValidEven_ELF_Dataset.csv', window_size=500)
+
+
+Training Set:
+	Total 1138 files
+	Malware Count : 569
+	Goodware Count: 569
+Testing Set:
+	Total 142 files
+	Malware Count : 71
+	Goodware Count: 71
+Validation Set:
+	Total 142 files
+	Malware Count : 71
+	Goodware Count: 71
+
+
+Checkpoint saved at: 1, ../checkpoint/malconv_model.pth
+Epoch: 01 | Epoch Time: 19m 43s | Train Loss: 0.639 | Train Acc: 0.622 | Val. Loss: 0.570 | Val. Acc: 0.853
+Checkpoint saved at: 2, ../checkpoint/malconv_model.pth
+Epoch: 02 | Epoch Time: 19m 38s | Train Loss: 0.435 | Train Acc: 0.853 | Val. Loss: 0.406 | Val. Acc: 0.915
+Checkpoint saved at: 3, ../checkpoint/malconv_model.pth
+Epoch: 03 | Epoch Time: 19m 36s | Train Loss: 0.263 | Train Acc: 0.951 | Val. Loss: 0.274 | Val. Acc: 0.926
+Checkpoint saved at: 4, ../checkpoint/malconv_model.pth
+Epoch: 04 | Epoch Time: 19m 40s | Train Loss: 0.147 | Train Acc: 0.981 | Val. Loss: 0.205 | Val. Acc: 0.926
+Checkpoint saved at: 5, ../checkpoint/malconv_model.pth
+Epoch: 05 | Epoch Time: 19m 40s | Train Loss: 0.080 | Train Acc: 0.999 | Val. Loss: 0.165 | Val. Acc: 0.932
+Checkpoint saved at: 6, ../checkpoint/malconv_model.pth
+Epoch: 06 | Epoch Time: 19m 39s | Train Loss: 0.045 | Train Acc: 1.000 | Val. Loss: 0.143 | Val. Acc: 0.932
+Checkpoint saved at: 7, ../checkpoint/malconv_model.pth
+Epoch: 07 | Epoch Time: 19m 45s | Train Loss: 0.025 | Train Acc: 1.000 | Val. Loss: 0.124 | Val. Acc: 0.932
+Checkpoint saved at: 8, ../checkpoint/malconv_model.pth
+Epoch: 08 | Epoch Time: 19m 44s | Train Loss: 0.016 | Train Acc: 1.000 | Val. Loss: 0.116 | Val. Acc: 0.932
+Checkpoint saved at: 9, ../checkpoint/malconv_model.pth
+Epoch: 09 | Epoch Time: 19m 43s | Train Loss: 0.011 | Train Acc: 1.000 | Val. Loss: 0.111 | Val. Acc: 0.932
+Checkpoint saved at: 10, ../checkpoint/malconv_model.pth
+Epoch: 10 | Epoch Time: 19m 46s | Train Loss: 0.008 | Train Acc: 1.000 | Val. Loss: 0.104 | Val. Acc: 0.932
+Checkpoint saved at: 11, ../checkpoint/malconv_model.pth
+Epoch: 11 | Epoch Time: 19m 42s | Train Loss: 0.006 | Train Acc: 1.000 | Val. Loss: 0.101 | Val. Acc: 0.932
+Checkpoint saved at: 12, ../checkpoint/malconv_model.pth
+Epoch: 12 | Epoch Time: 19m 41s | Train Loss: 0.005 | Train Acc: 1.000 | Val. Loss: 0.098 | Val. Acc: 0.938
+Checkpoint saved at: 13, ../checkpoint/malconv_model.pth
+Epoch: 13 | Epoch Time: 19m 44s | Train Loss: 0.004 | Train Acc: 1.000 | Val. Loss: 0.096 | Val. Acc: 0.938
+Checkpoint saved at: 14, ../checkpoint/malconv_model.pth
+Epoch: 14 | Epoch Time: 19m 40s | Train Loss: 0.003 | Train Acc: 1.000 | Val. Loss: 0.094 | Val. Acc: 0.938
+Checkpoint saved at: 15, ../checkpoint/malconv_model.pth
+Epoch: 15 | Epoch Time: 19m 36s | Train Loss: 0.002 | Train Acc: 1.000 | Val. Loss: 0.093 | Val. Acc: 0.938
+Checkpoint saved at: 16, ../checkpoint/malconv_model.pth
+Epoch: 16 | Epoch Time: 19m 36s | Train Loss: 0.002 | Train Acc: 1.000 | Val. Loss: 0.091 | Val. Acc: 0.938
+Checkpoint saved at: 17, ../checkpoint/malconv_model.pth
+Epoch: 17 | Epoch Time: 19m 31s | Train Loss: 0.002 | Train Acc: 1.000 | Val. Loss: 0.090 | Val. Acc: 0.953
+Checkpoint saved at: 18, ../checkpoint/malconv_model.pth
+Epoch: 18 | Epoch Time: 19m 33s | Train Loss: 0.002 | Train Acc: 1.000 | Val. Loss: 0.089 | Val. Acc: 0.953
+Checkpoint saved at: 19, ../checkpoint/malconv_model.pth
+Epoch: 19 | Epoch Time: 19m 35s | Train Loss: 0.001 | Train Acc: 1.000 | Val. Loss: 0.088 | Val. Acc: 0.953
+Checkpoint saved at: 20, ../checkpoint/malconv_model.pth
+Epoch: 20 | Epoch Time: 19m 30s | Train Loss: 0.001 | Train Acc: 1.000 | Val. Loss: 0.087 | Val. Acc: 0.953
+Checkpoint saved at: 21, ../checkpoint/malconv_model.pth
+Epoch: 21 | Epoch Time: 19m 33s | Train Loss: 0.001 | Train Acc: 1.000 | Val. Loss: 0.087 | Val. Acc: 0.953
+Checkpoint saved at: 22, ../checkpoint/malconv_model.pth
+Epoch: 22 | Epoch Time: 19m 33s | Train Loss: 0.001 | Train Acc: 1.000 | Val. Loss: 0.086 | Val. Acc: 0.953
+Checkpoint saved at: 23, ../checkpoint/malconv_model.pth
+Epoch: 23 | Epoch Time: 19m 30s | Train Loss: 0.001 | Train Acc: 1.000 | Val. Loss: 0.085 | Val. Acc: 0.953
+Checkpoint saved at: 24, ../checkpoint/malconv_model.pth
+Epoch: 24 | Epoch Time: 19m 31s | Train Loss: 0.001 | Train Acc: 1.000 | Val. Loss: 0.085 | Val. Acc: 0.953
+Checkpoint saved at: 25, ../checkpoint/malconv_model.pth
+Epoch: 25 | Epoch Time: 19m 33s | Train Loss: 0.001 | Train Acc: 1.000 | Val. Loss: 0.084 | Val. Acc: 0.953
+Checkpoint saved at: 26, ../checkpoint/malconv_model.pth
+Epoch: 26 | Epoch Time: 19m 31s | Train Loss: 0.001 | Train Acc: 1.000 | Val. Loss: 0.084 | Val. Acc: 0.953
+Checkpoint saved at: 27, ../checkpoint/malconv_model.pth
+Epoch: 27 | Epoch Time: 19m 31s | Train Loss: 0.001 | Train Acc: 1.000 | Val. Loss: 0.083 | Val. Acc: 0.953
+Checkpoint saved at: 28, ../checkpoint/malconv_model.pth
+Epoch: 28 | Epoch Time: 19m 33s | Train Loss: 0.001 | Train Acc: 1.000 | Val. Loss: 0.083 | Val. Acc: 0.953
+Checkpoint saved at: 29, ../checkpoint/malconv_model.pth
+Epoch: 29 | Epoch Time: 19m 28s | Train Loss: 0.000 | Train Acc: 1.000 | Val. Loss: 0.083 | Val. Acc: 0.953
+Checkpoint saved at: 30, ../checkpoint/malconv_model.pth
+Epoch: 30 | Epoch Time: 19m 29s | Train Loss: 0.000 | Train Acc: 1.000 | Val. Loss: 0.082 | Val. Acc: 0.953
+Checkpoint saved at: 31, ../checkpoint/malconv_model.pth
+Epoch: 31 | Epoch Time: 19m 33s | Train Loss: 0.000 | Train Acc: 1.000 | Val. Loss: 0.082 | Val. Acc: 0.953
+Checkpoint saved at: 32, ../checkpoint/malconv_model.pth
+Epoch: 32 | Epoch Time: 19m 31s | Train Loss: 0.000 | Train Acc: 1.000 | Val. Loss: 0.082 | Val. Acc: 0.953
+Checkpoint saved at: 33, ../checkpoint/malconv_model.pth
+Epoch: 33 | Epoch Time: 19m 30s | Train Loss: 0.000 | Train Acc: 1.000 | Val. Loss: 0.081 | Val. Acc: 0.953
+Checkpoint saved at: 34, ../checkpoint/malconv_model.pth
+Epoch: 34 | Epoch Time: 19m 34s | Train Loss: 0.000 | Train Acc: 1.000 | Val. Loss: 0.081 | Val. Acc: 0.953
+Checkpoint saved at: 35, ../checkpoint/malconv_model.pth
+Epoch: 35 | Epoch Time: 19m 31s | Train Loss: 0.000 | Train Acc: 1.000 | Val. Loss: 0.081 | Val. Acc: 0.953
+Checkpoint saved at: 36, ../checkpoint/malconv_model.pth
+Epoch: 36 | Epoch Time: 19m 31s | Train Loss: 0.000 | Train Acc: 1.000 | Val. Loss: 0.081 | Val. Acc: 0.953
+Checkpoint saved at: 37, ../checkpoint/malconv_model.pth
+Epoch: 37 | Epoch Time: 19m 33s | Train Loss: 0.000 | Train Acc: 1.000 | Val. Loss: 0.080 | Val. Acc: 0.953
+Checkpoint saved at: 38, ../checkpoint/malconv_model.pth
+Epoch: 38 | Epoch Time: 19m 29s | Train Loss: 0.000 | Train Acc: 1.000 | Val. Loss: 0.080 | Val. Acc: 0.953
+Checkpoint saved at: 39, ../checkpoint/malconv_model.pth
+Epoch: 39 | Epoch Time: 19m 31s | Train Loss: 0.000 | Train Acc: 1.000 | Val. Loss: 0.080 | Val. Acc: 0.953
+Checkpoint saved at: 40, ../checkpoint/malconv_model.pth
+Epoch: 40 | Epoch Time: 19m 32s | Train Loss: 0.000 | Train Acc: 1.000 | Val. Loss: 0.080 | Val. Acc: 0.953
+Checkpoint saved at: 41, ../checkpoint/malconv_model.pth
+Epoch: 41 | Epoch Time: 19m 27s | Train Loss: 0.000 | Train Acc: 1.000 | Val. Loss: 0.080 | Val. Acc: 0.953
+Checkpoint saved at: 42, ../checkpoint/malconv_model.pth
+Epoch: 42 | Epoch Time: 19m 27s | Train Loss: 0.000 | Train Acc: 1.000 | Val. Loss: 0.079 | Val. Acc: 0.953
+Checkpoint saved at: 43, ../checkpoint/malconv_model.pth
+Epoch: 43 | Epoch Time: 19m 31s | Train Loss: 0.000 | Train Acc: 1.000 | Val. Loss: 0.079 | Val. Acc: 0.953
+Checkpoint saved at: 44, ../checkpoint/malconv_model.pth
+Epoch: 44 | Epoch Time: 19m 28s | Train Loss: 0.000 | Train Acc: 1.000 | Val. Loss: 0.079 | Val. Acc: 0.953
+Checkpoint saved at: 45, ../checkpoint/malconv_model.pth
+Epoch: 45 | Epoch Time: 19m 29s | Train Loss: 0.000 | Train Acc: 1.000 | Val. Loss: 0.079 | Val. Acc: 0.953
+Checkpoint saved at: 46, ../checkpoint/malconv_model.pth
+Epoch: 46 | Epoch Time: 19m 31s | Train Loss: 0.000 | Train Acc: 1.000 | Val. Loss: 0.079 | Val. Acc: 0.953
+Checkpoint saved at: 47, ../checkpoint/malconv_model.pth
+Epoch: 47 | Epoch Time: 19m 28s | Train Loss: 0.000 | Train Acc: 1.000 | Val. Loss: 0.079 | Val. Acc: 0.953
+Checkpoint saved at: 48, ../checkpoint/malconv_model.pth
+Epoch: 48 | Epoch Time: 19m 30s | Train Loss: 0.000 | Train Acc: 1.000 | Val. Loss: 0.079 | Val. Acc: 0.953
+Checkpoint saved at: 49, ../checkpoint/malconv_model.pth
+Epoch: 49 | Epoch Time: 19m 34s | Train Loss: 0.000 | Train Acc: 1.000 | Val. Loss: 0.078 | Val. Acc: 0.953
+Checkpoint saved at: 50, ../checkpoint/malconv_model.pth
+Epoch: 50 | Epoch Time: 19m 33s | Train Loss: 0.000 | Train Acc: 1.000 | Val. Loss: 0.078 | Val. Acc: 0.953
+--------> testing results <---------
+confusion matrix:
+[[66  5]
+ [ 2 69]]
+classification report: 
+              precision    recall  f1-score   support
+
+           0       0.97      0.93      0.95        71
+           1       0.93      0.97      0.95        71
+
+    accuracy                           0.95       142
+   macro avg       0.95      0.95      0.95       142
+weighted avg       0.95      0.95      0.95       142
+
+accuracy is 0.9507042253521126
+runing time: 979m0s
