@@ -48,7 +48,7 @@ int main(int argc, char** argv){
         value++;
     }
 
-    uint8_t value = 56;
+    value = 56;
     for(int i = 0; i < 200; i++){
         malware = load_elf_file(argv[1]);
         strcpy(buffer,base_malware_file);
