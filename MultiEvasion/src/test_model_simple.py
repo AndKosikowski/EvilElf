@@ -99,13 +99,11 @@ class test_model:
         print('confusion matrix:')
         print(confusion_matrix(y_test, y_pred))
 
-
-
         print(f"classification report: ".format(classification_report(y_test, y_pred,labels=[0,1])))
         print(classification_report(y_test, y_pred,labels=[0,1]))
         print(f'accuracy is {accuracy_score(y_test, y_pred)}')
-        fpr, tpr, thresholds = roc_curve(y_test, preds_all, pos_label=1,drop_intermediate=False)
-        print(thresholds)
+        fpr, tpr, thresholds = roc_curve(y_test, preds_all, pos_label=1)
+        print(y_pred)
         auc_value = auc(fpr, tpr)
         print(f'AUC is {auc_value}')
         with open(args.result_path + self.model_name[0:-4] + "_result.txt",'w') as f:
