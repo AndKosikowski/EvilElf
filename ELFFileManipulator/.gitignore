@@ -1,6 +1,7 @@
 **
 **/
 !*.c
+!*.h
 !LICENSE
 !makefile
 !README.md
