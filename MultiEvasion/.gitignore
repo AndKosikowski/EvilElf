@@ -2,8 +2,9 @@
 .DS_Store
 
 ## exclude folder
-/data/**
-/result/**
+data/**
+result/**
+models/**
 /torchattacks/**
 /secml_malware/**
 /test/**

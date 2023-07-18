@@ -104,7 +104,7 @@ class test_model:
         print(f"classification report: ".format(classification_report(y_test, y_pred,labels=[0,1])))
         print(classification_report(y_test, y_pred,labels=[0,1]))
         print(f'accuracy is {accuracy_score(y_test, y_pred)}')
-        fpr, tpr, thresholds = roc_curve(y_test, preds_all, pos_label=1,sample_weight = [0.1,0.2,0.3,0.4],drop_intermediate=False)
+        fpr, tpr, thresholds = roc_curve(y_test, preds_all, pos_label=1,drop_intermediate=False)
         print(thresholds)
         auc_value = auc(fpr, tpr)
         print(f'AUC is {auc_value}')
