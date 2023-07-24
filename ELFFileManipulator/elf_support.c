@@ -375,7 +375,7 @@ int* find_note(Elf_Manager* manager) {
         Elf_Shdr section = manager->s_hdr[i];
         char* found = string_table_file_section + section.sh_name;
         if (strncmp(".note", found, 5) == 0) {
-            printf(".note: %lx\n", section.sh_offset);
+            // printf(".note: %lx\n", section.sh_offset);
             indexes[counter - 1] = i;
             counter++;
             void* ptr = realloc(indexes, sizeof(int) * counter);
@@ -397,7 +397,7 @@ int find_comment(Elf_Manager* manager) {
         Elf_Shdr section = manager->s_hdr[i];
         char* found = string_table_file_section + section.sh_name;
         if (strcmp(".comment", found) == 0) {
-            printf(".comment: %lx\n", section.sh_offset);
+            // printf(".comment: %lx\n", section.sh_offset);
             return i;
         }
     }
@@ -411,7 +411,7 @@ int find_debug(Elf_Manager* manager) {
         Elf_Shdr section = manager->s_hdr[i];
         char* found = string_table_file_section + section.sh_name;
         if (strcmp(".debug", found) == 0) {
-            printf(".debug: %lx\n", section.sh_offset);
+            // printf(".debug: %lx\n", section.sh_offset);
             return i;
         }
     }

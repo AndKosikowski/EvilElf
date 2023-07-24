@@ -35,7 +35,6 @@ int main(int argc, char** argv){
 
     Elf_Xword added_size = 0;
 
-
     int size = get_file_name_size_from_path(malware->file_path);
     char base_malware_file[200];
     strcpy(base_malware_file, malware->file_path + strlen(malware->file_path)-size);
@@ -45,45 +44,94 @@ int main(int argc, char** argv){
     char base_benign_file[200];
     strcpy(base_benign_file, benign->file_path + strlen(benign->file_path)-size);
 
+    //append
+    // strcpy(buffer,base_malware_file);
+    // strcat(buffer,"_append_benign_50k_");
+    // strcat(buffer,base_benign_file);    
 
+    // while(added_size < 800000){
+    //     int new_section_index = append_new_section(malware, text_section_size);
+    //     memcpy(malware->file_sections[new_section_index], benign->file_sections[text_section_index], text_section_size); 
+    //     added_size = added_size + text_section_size;   
+    // }
+    // write_elf_file(malware, buffer);
+    // free_manager(malware);
+
+
+    //dynamic
+    // Elf_Manager* malware = load_elf_file(argv[1]);
     strcpy(buffer,base_malware_file);
-    strcat(buffer,"_append_benign_50k_");
+    strcat(buffer,"_extend_dynamic_benign_50k_");
     strcat(buffer,base_benign_file);
 
-    while(added_size < 50000){
-        int new_section_index = append_new_section(malware, text_section_size);
-        memcpy(malware->file_sections[new_section_index], benign->file_sections[text_section_index], text_section_size); 
-        added_size = added_size + text_section_size;   
+    int APPEND_AMOUNT = 50000;
+
+    int original_dynamic_section_size = return_dynamic_size(malware);
+    int dynamic_section_index = extend_dynamic_segment(malware, APPEND_AMOUNT);
+    
+    int left_to_add = APPEND_AMOUNT;
+    int copy_amount = text_section_size;
+    void* copy_location = malware->file_sections[dynamic_section_index] + original_dynamic_section_size;
+    while(left_to_add > 0){
+        if(left_to_add < text_section_size){
+            copy_amount = left_to_add;
+        }
+        memcpy(copy_location, benign->file_sections[text_section_index], copy_amount); 
+        left_to_add -= copy_amount;
+        copy_location += copy_amount;
     }
     write_elf_file(malware, buffer);
     free_manager(malware);
 
-    // Elf_Manager* malware = load_elf_file(argv[1]);
-    // strcpy(buffer,argv[1]);
-    // strcat(buffer,"_append_4_50k");
-    // while(added_size < 50000){
-    //     int new_section_index = append_new_section(malware, text_section_size);
-    //     memcpy(malware->file_sections[new_section_index], benign->file_sections[text_section_index], text_section_size);        
+    //begin copy and paste from support c extend_dynamic_segment
+    // int cutoff;
+    // int file_size;
+    // for (int i = 0; i < manager->e_hdr.e_phnum; i++) {
+    //     Elf_Phdr segment = manager->p_hdr[i];
+    //     if (segment.p_type == 2) { //will need to change this for PT_LOAD segment
+    //         cutoff = segment.p_offset;
+    //         file_size = segment.p_filesz;
+    //         manager->p_hdr[i].p_filesz += ADDENDUM;
+    //         break;
+    //     }
     // }
-    // write_elf_file(malware, buffer);
-    // free_manager(malware);
-    
-    
+    // int dynam_section;
+    // for (int i = 0; i < manager->e_hdr.e_shnum; i++) {
+    //     Elf_Shdr section = manager->s_hdr[i];
+    //     if (section.sh_offset >= cutoff && section.sh_offset < cutoff + file_size) {
+    //         dynam_section = i;
+    //     }
+    // }
 
+    // void* ptr = realloc(manager->file_sections[dynam_section], sizeof(uint8_t*) * (file_size + ADDENDUM));
+    // if (ptr == NULL) {
+    //     printf("Insufficient memory during realloc\n");
+    //     return -1;
+    // }
+    // manager->file_sections[dynam_section] = ptr;
+    // manager->s_hdr[dynam_section].sh_size += ADDENDUM;
 
-    // //extending dynamic segment and inserting benign text section
-    // malware = load_elf_file(argv[1]);
-    // strcpy(buffer,argv[1]);
-    // strcat(buffer,"_extend_dynam_benign_50k");
-    // extend_dynamic_segment(malware, 50000);
+    // uint8_t* section = manager->file_sections[dynam_section];
+    // for (int i = file_size; i < file_size + ADDENDUM; i++) {
+    //     section[i] = 4;
+    // }
+    // memcpy(&(manager->file_sections[dynam_section]), &section, sizeof(uint8_t*));
 
+    // for (int i = 0; i < manager->e_hdr.e_phnum; i++) {
+    //     Elf_Phdr segment = manager->p_hdr[i];
+    //     if (segment.p_offset >= cutoff + file_size) {
+    //         manager->p_hdr[i].p_offset += ADDENDUM;
+    //     }
+    // }
+    // for (int i = 0; i < manager->e_hdr.e_shnum; i++) {
+    //     Elf_Shdr section = manager->s_hdr[i];
+    //     if (section.sh_offset >= cutoff + file_size) {
+    //         manager->s_hdr[i].sh_offset += ADDENDUM;
+    //     }
+    // }
+    // manager->e_hdr.e_shoff += ADDENDUM;
 
-    // //changing note, comment, debug sections if the exist
-    // malware = load_elf_file(argv[1]);
-    // change_note_comment_debug(malware, benign, text_section_index, buffer, argv[1]);
-
-
-        
+    //end copy and paste from support.c
 
     free_manager(benign);
     return 0;
