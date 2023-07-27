@@ -6,7 +6,7 @@
 
 ## Overview
 
-This project is for editing ELF files without altering any functionality in order to allow them to evade detection from end-to-end deep learning malware detectors. The code is written in C using existing elf.h as a basis for our implementations of modifying and reading ELF files. This code was only tested on x64 least significant bit endianness ELF files but should work on all ELF files.
+This folder is for editing ELF files without altering any functionality in order to allow them to evade detection from end-to-end deep learning malware detectors. The code is written in C using existing elf.h as a basis for our implementations of modifying and reading ELF files. This code was only tested on x64 least significant bit endianness ELF files but should work on all ELF files.
 
 ---
 
