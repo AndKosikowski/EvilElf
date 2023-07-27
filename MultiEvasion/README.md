@@ -1,4 +1,8 @@
-# Originally from MultiEvasion project, need to update
+# Originally from MultiEvasion project https://github.com/UCdasec/MultiEvasion
+
+---
+
+Our contributions to this MultiEvasion project is modifications to the project for ease of testing, adding test_model_simple.py to allow easier testing for various models at once. Otherwise this portion of the project is large unchanged besides some needed updates for installation. 
 
 # MultiEvasion
 
@@ -14,7 +18,8 @@ Hao Liu, Wenhai Sun, Nan Niu, Boyang Wang, "MultiEvasion: Evasion Attacks Agains
 ## Environment
 To running this repositery, we recommed you to install the environment with advmal.txt file:
 ```conda env create --file advmal.txt```
-
+Additionally you likely will need to run the following in the conda environment
+```pip install git+https://github.com/elastic/ember.git```
 
 ## Content
 
