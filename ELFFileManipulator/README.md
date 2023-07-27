@@ -31,6 +31,21 @@ See the example .c files for usage of some of the functions in how to manipulate
 
 The load and free are for setting up the ELF file in memory, while write_elf_file will write the current modified ELF file in memory to a file specified by the second argument.
 
+### General Breakdown of ELF_Support and the ELF_Manager Struct
+The ELF Manager is a C struct that maps out the contents of an ELF file based on the reference specifications from the following :
+
+https://refspecs.linuxfoundation.org/elf/elf.pdf
+
+It contains a pointer to the ELF_Header struct, Section Header Table struct, Program Header table struct, as well as the file's sections and some basic information on the name and path of a file. The basic types and structs were provided by:
+
+```include <elf.h>```
+
+https://man7.org/linux/man-pages/man5/elf.5.html
+
+Almost all of our modifications modify these structs directly or the file sections loaded into memory to make it as easy as possible to add future modification methods that apply to every ELF file. One notable example is our find_gaps_in_elf_file() method, which finds the location of gaps in the file (content that is merely padding for memory/file alignment) that doesn't normally make up the content of the file. For modifications like this you can analyze the manager struct to get information about them, but you must modify the file directory afterwards (after write_elf_file()) in order to actually do anything with their information. 
+
+We also support numerous helper methods for finding specific sections and segments by name and type, and printing other extra information about the flags and binary of specific parts of the file. 
+
 ---
 
 
