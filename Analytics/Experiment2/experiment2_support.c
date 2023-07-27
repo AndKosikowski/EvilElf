@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../elf_support.h"
+#include "../../ELFFileManipulator/elf_support.h"
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
 
-
+//Uncomment out one of the sections below as needed to get the specific malware modification you wish to create
 int main(int argc, char** argv){
     // if(argc < 4){
     //     printf("Need to specify two paths to different files and a value between 0-255\n");
@@ -44,22 +44,22 @@ int main(int argc, char** argv){
     char base_benign_file[200];
     strcpy(base_benign_file, benign->file_path + strlen(benign->file_path)-size);
 
-    //append
+    //Start End Appendix (Append Section)
     // strcpy(buffer,base_malware_file);
     // strcat(buffer,"_append_benign_50k_");
     // strcat(buffer,base_benign_file);    
 
-    // while(added_size < 800000){
+    // while(added_size < 50000){
     //     int new_section_index = append_new_section(malware, text_section_size);
     //     memcpy(malware->file_sections[new_section_index], benign->file_sections[text_section_index], text_section_size); 
     //     added_size = added_size + text_section_size;   
     // }
     // write_elf_file(malware, buffer);
     // free_manager(malware);
+    //Finish End Appendix (Append Section)
 
 
-    //dynamic
-    // Elf_Manager* malware = load_elf_file(argv[1]);
+    //Start Dynamic Extension (Extend Dynamic)
     strcpy(buffer,base_malware_file);
     strcat(buffer,"_extend_dynamic_benign_50k_");
     strcat(buffer,base_benign_file);
@@ -82,56 +82,7 @@ int main(int argc, char** argv){
     }
     write_elf_file(malware, buffer);
     free_manager(malware);
-
-    //begin copy and paste from support c extend_dynamic_segment
-    // int cutoff;
-    // int file_size;
-    // for (int i = 0; i < manager->e_hdr.e_phnum; i++) {
-    //     Elf_Phdr segment = manager->p_hdr[i];
-    //     if (segment.p_type == 2) { //will need to change this for PT_LOAD segment
-    //         cutoff = segment.p_offset;
-    //         file_size = segment.p_filesz;
-    //         manager->p_hdr[i].p_filesz += ADDENDUM;
-    //         break;
-    //     }
-    // }
-    // int dynam_section;
-    // for (int i = 0; i < manager->e_hdr.e_shnum; i++) {
-    //     Elf_Shdr section = manager->s_hdr[i];
-    //     if (section.sh_offset >= cutoff && section.sh_offset < cutoff + file_size) {
-    //         dynam_section = i;
-    //     }
-    // }
-
-    // void* ptr = realloc(manager->file_sections[dynam_section], sizeof(uint8_t*) * (file_size + ADDENDUM));
-    // if (ptr == NULL) {
-    //     printf("Insufficient memory during realloc\n");
-    //     return -1;
-    // }
-    // manager->file_sections[dynam_section] = ptr;
-    // manager->s_hdr[dynam_section].sh_size += ADDENDUM;
-
-    // uint8_t* section = manager->file_sections[dynam_section];
-    // for (int i = file_size; i < file_size + ADDENDUM; i++) {
-    //     section[i] = 4;
-    // }
-    // memcpy(&(manager->file_sections[dynam_section]), &section, sizeof(uint8_t*));
-
-    // for (int i = 0; i < manager->e_hdr.e_phnum; i++) {
-    //     Elf_Phdr segment = manager->p_hdr[i];
-    //     if (segment.p_offset >= cutoff + file_size) {
-    //         manager->p_hdr[i].p_offset += ADDENDUM;
-    //     }
-    // }
-    // for (int i = 0; i < manager->e_hdr.e_shnum; i++) {
-    //     Elf_Shdr section = manager->s_hdr[i];
-    //     if (section.sh_offset >= cutoff + file_size) {
-    //         manager->s_hdr[i].sh_offset += ADDENDUM;
-    //     }
-    // }
-    // manager->e_hdr.e_shoff += ADDENDUM;
-
-    //end copy and paste from support.c
+    //Finish Dynamic Extension (Extend Dynamic)
 
     free_manager(benign);
     return 0;

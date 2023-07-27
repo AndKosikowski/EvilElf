@@ -40,6 +40,8 @@ test.py
 mal_test.ipynb
 adv_attack_against_detectors_malconv_avast.py
 
+!*.sh
+
 
 ##exclude temporarily, will release after paper published
 #/src/**
