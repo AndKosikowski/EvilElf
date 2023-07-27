@@ -20,9 +20,13 @@ The elf_support.c and elf_support.h are the key files to import to modify existi
 ## Basic Usage
 See the example .c files for usage of some of the functions in how to manipulate Linux ELF files. In general, you will need to run the following
 ```Elf_Manager* manager = load_elf_file(argv[1]);```
+
 ```Insert code here to modify manager (ELF File loaded in memory) ```
+
 ```write_elf_file(manager,argv[1]);```
+
 ```Insert code here for additional modifications that require directly writing to the file```
+
 ```free_manager(manager);```
 
 The load and free are for setting up the ELF file in memory, while write_elf_file will write the current modified ELF file in memory to a file specified by the second argument.
