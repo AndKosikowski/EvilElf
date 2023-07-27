@@ -11,3 +11,7 @@ cmp -l example ModifiedElfOutput/example | gawk '{printf "%08X %02X %02X\n", $1,
 Valgrind because you are using C:
 
 valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt ./add_elf_section example
+
+
+pip install git+https://github.com/elastic/ember.git
+
