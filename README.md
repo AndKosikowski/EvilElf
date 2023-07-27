@@ -5,7 +5,7 @@
 ---
 
 ## What is this?
-The goal of this codebase is investigate whether end-to-end deep learning malware detectors are capable of being fooled by modifying existing malware without altering its functionality. That is to disguise malware that is detected by your malware detector (or say your antivirus) and see if that disguise is enough to trick it. The goal of this project would be to expand upon previous work for Windows executables (PE files) and see if similar ideas and methods would apply for Linux executables (ELF files). Ultimately these new malware samples would then be used to train new malware detectors to perform better against obfuscated malware in the future.
+The goal of this codebase is to modify existing malware without altering its functionality and investigate whether end-to-end deep learning malware detectors are capable of being fooled by the obfuscated malware. That is, disguising malware that is detected by your malware detector (or say your antivirus) and see if that disguise is enough to trick it. The goal of this project would be to expand upon previous work for Windows executables (PE files) and see if similar ideas and methods would apply for Linux executables (ELF files). Ultimately, these new malware samples would then be used to train new malware detectors to perform better against obfuscated malware in the future.
 
 
 ---
@@ -16,7 +16,7 @@ You can find a detailed breakdown of some of this projects accomplishments in ou
 ---
 
 ## Breakdown
-The project is composed of three main groups: Analytics containing data, experiments, and results, MultiEvasion containing pre-existing malware detection code from a previous project (https://github.com/UCdasec/MultiEvasion), and ELFFileManipulator contains the novel modifications to ELF files in order to evade detection. The majority of this project was spent creating modifications for ELF files and contains a helpful library for others to modify ELF files themselves. Each main directory has a readme giving greater detail about its contents.
+The project is composed of three main groups: Analytics containing data, experiments, and results, MultiEvasion containing pre-existing malware detection code from a previous project (https://github.com/UCdasec/MultiEvasion), and ELFFileManipulator containing the novel modifications to ELF files in order to evade detection. The majority of this project was spent creating modifications for ELF files and contains a helpful library for others to modify ELF files themselves. Each main directory has a readme giving greater detail about its contents.
 
 
 ---
