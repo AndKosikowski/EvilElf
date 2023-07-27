@@ -1,5 +1,5 @@
 # Evil ELF 
-## Created by Andrew Kosikowski and Daniel "Jun" Chou
+## Created by Andrew Kosikowski and Daniel "Jun" Cho
 ### PI: Dr. Boyang Wang
 ### Co-PI: Dr. Anca Ralescu
 ---
@@ -22,11 +22,13 @@ The project is composed of three main groups: Analytics containing data, experim
 ---
 
 ## Acknowledgements
-This code was created as part of the Research Experiences for Undergraduates (REU) in Hardware and Embedded Systems Security and Trust (RHEST), NSF award 2150086, during the summer of 2023 at the University of Cincinnati. The project's code was created by Andrew Kosikowski and Daniel "Jun" Chou during their undergraduates at Rose-Hulman Institute of Technology and Hamilton College respectively. The project was mentored by Dr. Boyang Wang of the University of Cincinnati and co-funded by Dr. Anca Ralescu of the same university. 
+This code was created as part of the Research Experiences for Undergraduates (REU) in Hardware and Embedded Systems Security and Trust (RHEST), NSF award 2150086, during the summer of 2023 at the University of Cincinnati. The project's code was created by Andrew Kosikowski and Daniel "Jun" Cho during their undergraduates at Rose-Hulman Institute of Technology and Hamilton College respectively. The project was mentored by Dr. Boyang Wang of the University of Cincinnati and co-funded by Dr. Anca Ralescu of the same university. 
 
 ---
 
 ## Contact
 Andrew Kosikowski andkosikowski@gmail.com https://www.andrewkosikowski.com
+
+Jun Cho junc13579@gmail.com
 
 Dr. Boyang Wang, boyang.wang@uc.edu
